@@ -1,4 +1,5 @@
 import smtplib
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import yaml
 
@@ -20,19 +21,16 @@ class Gmail:
         self.gmail_password = self.yamlData['Sender']['key']
 
     def sendMsg(self, subject="ErrorMsg", content="content"):
-        msg = MIMEText(content)
+        Logo = '<p align="center"> <a href="" rel="noopener"> <img width=200px height=200px src="https://raw.githubusercontent.com/XinBow99/TaobaoCrawler/main/search/crawler.png" alt="Project logo"></a> </p> <h3 align="center">TaobaoCrawler</h3><br>'
+        NewContent = "<p>{}</p>".format(content.replace('\n', '<br>'))
+        msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
         msg['From'] = self.gmail_user
         msg['To'] = ",".join(self.yamlData['Receiver'])
+        part1 = MIMEText(Logo + NewContent, 'html')
+        msg.attach(part1)
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.ehlo()
         server.login(self.gmail_user, self.gmail_password)
-        Logo = '''
-        <p align="center">
-            <a href="" rel="noopener">
-                <img width=200px height=200px src="https://raw.githubusercontent.com/XinBow99/TaobaoCrawler/main/search/crawler.png" alt="Project logo"></a>
-            </p>
-        <h3 align="center">TaobaoCrawler</h3><br>
-        '''
-        server.send_message(Logo + msg)
+        server.send_message(msg)
         server.quit()
