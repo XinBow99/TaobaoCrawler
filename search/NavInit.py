@@ -27,7 +27,7 @@ def get_g_page_config(content: str):
             'function': 'get_g_page_config',
             'msg': '網頁內容不正確'
         }
-    gpcRe = re.findall(pattern=r'g_page_config \= (.*?)\;',
+    gpcRe = re.findall(pattern=r'g_page_config \= (.*)\;',
                        string=content.strip().strip("\n"))
     print(gpcRe)
 
