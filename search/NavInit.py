@@ -1,9 +1,11 @@
+from search.gmail import GInit
 from mysqlplugin import NavOrm
 import argparse
 import re
 import sys
 import getpass
 import json
+import gmail
 # 自動化控制
 from selenium import webdriver
 
@@ -58,7 +60,7 @@ class taobao:
         self.TestUrl()
         print('[__init__]初始化完畢！')
         print('==============================')
-        self.getFirstPageNav()
+        self.getFirstPageNavService()
         self.closeDriver()
 
     def initBrowser(self):
@@ -90,17 +92,18 @@ class taobao:
         '''
         self.driver.get("https://www.google.com")
 
-    def getFirstPageNav(self):
+    def getFirstPageNavService(self):
         '''
         獲取需儲存之品牌Nav
         https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2
         '''
-        print("[getFirstPageNav]載入關鍵字 {}".format(self.key))
+        print("[getFirstPageNavService]載入關鍵字 {}".format(self.key))
         self.driver.get("https://s.taobao.com/search?q={}".format(self.key))
         pageSource = self.driver.page_source
         brands = get_g_page_config(pageSource)
+        newRows = []
         for brand in brands:
-            print(brands)
+            print(brands['text'])
             exists = self.NavDBSession.query(
                 NavOrm.Navs
             ).filter_by(
@@ -111,8 +114,20 @@ class taobao:
             if not exists:
                 self.NavDBSession.add(NavOrm.Navs(
                     brand['text'], brand['value']))
+                newRows.append(brand['text'])
         self.NavDBSession.commit()
         self.NavDBSession.close()
+        MailString = "[總和]獲取{}項品牌\n[新增]{}項\n{}\n[更新品牌參數]{}項\n------------\n[更新頻率]Once a day".format(
+            len(brands),
+            len(newRows),
+            "、".join(newRows),
+            len(brands) - len(newRows)
+        )
+        print(MailString)
+        GInit().sendMsg(
+            "[淘寶爬蟲]品牌更新作業",
+            MailString
+        )
 
     def closeDriver(self):
         self.driver.close()
