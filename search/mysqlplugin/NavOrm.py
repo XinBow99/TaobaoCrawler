@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column  # 元素/主key
-from sqlalchemy import exists
+from sqlalchemy import exists, update
 # 創接口/建立關系relationship(table.ID)
 from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import create_engine
@@ -31,7 +31,7 @@ class Navs(Base):
     brand = Column(TEXT, primary_key=True)
     ppath = Column(TEXT, nullable=True)
     createAt = Column(DATETIME)
-    updateAt =  Column(DATETIME)
+    updateAt = Column(DATETIME)
 
     def __init__(self, brand, ppath):
         self.brand = brand
