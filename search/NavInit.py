@@ -63,7 +63,7 @@ class taobao:
             ServerUserName)
         # 加入arg
         options.add_argument("user-data-dir={}".format(OriginChromePath))
-        options.add_argument('--headless')
+        # options.add_argument('--headless')
         # options.add_argument('--no-sandbox')
         # options.add_argument('--disable-gpu')
         # options.add_argument('--disable-dev-shm-usage')
