@@ -1,4 +1,3 @@
-from search.gmail import GInit
 from mysqlplugin import NavOrm
 import argparse
 import re
@@ -124,7 +123,7 @@ class taobao:
             len(brands) - len(newRows)
         )
         print(MailString)
-        GInit().sendMsg(
+        gmail.GInit().sendMsg(
             "[淘寶爬蟲]品牌更新作業",
             MailString
         )
