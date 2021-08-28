@@ -116,7 +116,33 @@ class taobao:
                 newRows.append(brand['text'])
         self.NavDBSession.commit()
         self.NavDBSession.close()
-        MailString = "[總和]獲取{}項品牌\n[新增]{}項\n{}\n[更新品牌參數]{}項\n------------\n[更新頻率]Once a day".format(
+        MailString = '''
+        <div>
+            <strong>
+        [總和]獲取{}項品牌
+            </strong>
+        </div>
+        <div>
+            <strong>
+        [新增]{}項
+        {}
+            </strong>
+        </div>
+        <div>
+            <strong>
+        [更新品牌參數]{}項
+            </strong>
+        </div>
+        <div>
+            <strong>
+        ------------
+            </strong>
+        </div>
+        <div>
+            <strong>
+        [更新頻率]Once a day
+            </strong>
+        </div>'''.format(
             len(brands),
             len(newRows),
             "、".join(newRows),
