@@ -105,7 +105,7 @@ class taobao:
             ).filter_by(
                 brand=brand['text']
             ).update(
-                {"value": brand['value']}
+                {"ppath": brand['value']}
             ).scalar()
             if not exists:
                 self.NavDBSession.add(NavOrm.Navs(
