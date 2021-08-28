@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column  # 元素/主key
+from sqlalchemy import exists
 # 創接口/建立關系relationship(table.ID)
 from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import create_engine
@@ -27,10 +28,10 @@ print("ORM INIT complete!")
 class Navs(Base):
     __tablename__ = yamlData['navTable']
     __table_args__ = {"mysql_charset": "utf8"}
-    _id = Column(INTEGER, primary_key=True)
-    brand = Column(TEXT, nullable=True)
+    brand = Column(TEXT, primary_key=True)
     ppath = Column(TEXT, nullable=True)
     createAt = Column(DATETIME)
+    updateAt =  Column(DATETIME)
 
     def __init__(self, brand, ppath):
         self.brand = brand

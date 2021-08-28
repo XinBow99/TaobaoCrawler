@@ -100,7 +100,8 @@ class taobao:
         pageSource = self.driver.page_source
         brands = get_g_page_config(pageSource)
         for brand in brands:
-            print(brand)
+            exists = self.NavDBSession.query(self.NavDBSession.exists().where(NavOrm.Navs.brand == brand['text'])).scalar()
+            print(exists)
             self.NavDBSession.add(NavOrm.Navs(brand['text'], brand['value']))
         self.NavDBSession.commit()
         self.NavDBSession.close()
