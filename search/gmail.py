@@ -27,5 +27,12 @@ class Gmail:
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.ehlo()
         server.login(self.gmail_user, self.gmail_password)
-        server.send_message(msg)
+        Logo = '''
+        <p align="center">
+            <a href="" rel="noopener">
+                <img width=200px height=200px src="./DemoPhotos/robot.png" alt="Project logo"></a>
+            </p>
+        <h3 align="center">POPDOG BOT</h3><br>
+        '''
+        server.send_message(Logo + msg)
         server.quit()
