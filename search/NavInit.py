@@ -1,18 +1,11 @@
+from mysqlplugin import NavOrm
 import argparse
 import re
 import sys
 import getpass
+import json
 # 自動化控制
 from selenium import webdriver
-# 這個是拿來用滑鼠的
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-# 給鍵盤用的
-from selenium.webdriver.common.keys import Keys
-# 執行動作時會用到這鬼東西
-from selenium.common.exceptions import TimeoutException
 
 
 def get_g_page_config(content: str):
@@ -20,7 +13,6 @@ def get_g_page_config(content: str):
     取得該頁面的g_page_config
     - content: 網頁內容
     '''
-    print(content)
     if "g_page_config" not in content:
         return {
             'status': 0,
@@ -28,8 +20,23 @@ def get_g_page_config(content: str):
             'msg': '網頁內容不正確'
         }
     gpcRe = re.findall(pattern=r'g_page_config \= (.*)\;',
-                       string=content.strip().strip("\n"))
-    print(gpcRe)
+                       string=content.strip().strip("\n"))[0]
+    GpcNav = json.loads(gpcRe)
+
+    def checkNode(jsonContent, checkKey):
+        if checkKey in jsonContent:
+            return jsonContent[checkKey]
+        # 未來需放try catch
+        return jsonContent
+    GpcNav = checkNode(GpcNav, 'mods')
+    GpcNav = checkNode(GpcNav, 'nav')
+    GpcNav = checkNode(GpcNav, 'data')
+    GpcNav = checkNode(GpcNav, 'common')
+    for common in GpcNav:
+        if common['text'] == '品牌':
+            GpcNav = checkNode(GpcNav, 'sub')
+            break
+    return GpcNav
 
 
 class taobao:
@@ -44,9 +51,12 @@ class taobao:
         # 負責初始化瀏覽器的部分
         self.driver = None
         self.initBrowser()
+        print('[__init__]資料庫初始化中..')
+        NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
+        self.NavDBSession = NavDBSession()
         print('[__init__]瀏覽器測試中..')
         self.TestUrl()
-        print('[__init__]瀏覽器初始化完畢')
+        print('[__init__]初始化完畢！')
         print('==============================')
         self.getFirstPageNav()
         self.closeDriver()
@@ -88,7 +98,11 @@ class taobao:
         print("[getFirstPageNav]載入關鍵字 {}".format(self.key))
         self.driver.get("https://s.taobao.com/search?q={}".format(self.key))
         pageSource = self.driver.page_source
-        get_g_page_config(pageSource)
+        brands = get_g_page_config(pageSource)
+        for brand in brands:
+            self.NavDBSession.add(NavOrm.Navs(brand['text'], brand['value']))
+        self.NavDBSession.commit()
+        self.NavDBSession.close()
 
     def closeDriver(self):
         self.driver.close()
