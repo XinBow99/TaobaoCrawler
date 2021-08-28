@@ -124,7 +124,10 @@ class taobao:
         </div>
         <div>
             <strong>
-        [新增]{}項
+        [新增]{}項</strong>
+        </div>
+        <div>
+            <strong>
         {}
             </strong>
         </div>
@@ -148,7 +151,6 @@ class taobao:
             "、".join(newRows),
             len(brands) - len(newRows)
         )
-        print(MailString)
         gmail.GInit().sendMsg(
             "[淘寶爬蟲]品牌更新作業",
             MailString
