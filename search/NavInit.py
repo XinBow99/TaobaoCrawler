@@ -20,7 +20,8 @@ def get_g_page_config(content: str):
     取得該頁面的g_page_config
     - content: 網頁內容
     '''
-    if 'g_page_config' not in content:
+    print(content)
+    if "g_page_config" not in content:
         return {
             'status': 0,
             'function': 'get_g_page_config',
