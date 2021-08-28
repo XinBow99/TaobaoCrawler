@@ -101,6 +101,7 @@ class taobao:
         pageSource = self.driver.page_source
         brands = get_g_page_config(pageSource)
         newRows = []
+        updates = 0
         for brand in brands:
             print(brand['text'])
             exists = self.NavDBSession.query(
@@ -114,6 +115,8 @@ class taobao:
                 self.NavDBSession.add(NavOrm.Navs(
                     brand['text'], brand['value']))
                 newRows.append(brand['text'])
+            else:
+                updates += 1
         self.NavDBSession.commit()
         self.NavDBSession.close()
         MailString = '''
@@ -149,7 +152,7 @@ class taobao:
             len(brands),
             len(newRows),
             "、".join(newRows),
-            len(brands) - len(newRows)
+            updates
         )
         gmail.GInit().sendMsg(
             "[淘寶爬蟲]品牌更新作業",
