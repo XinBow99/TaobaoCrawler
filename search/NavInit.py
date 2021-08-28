@@ -97,8 +97,8 @@ class taobao:
 
 if __name__ == "__main__":
     # 讀取啟動參數
-    CrawlerArgs = argparse.ArgumentParser()
-    CrawlerArgs.add_argument(
+    CrawlerArgsParser = argparse.ArgumentParser()
+    CrawlerArgsParser.add_argument(
         "-k",
         "--key",
         type=str,
@@ -108,6 +108,6 @@ if __name__ == "__main__":
     def checkArgsNone(arg):
         if arg == None:
             sys.exit("請確認輸入參數是否正確")
-
+    CrawlerArgs = CrawlerArgsParser.parse_args()
     checkArgsNone(CrawlerArgs.key)
     taobao(CrawlerArgs.key)
