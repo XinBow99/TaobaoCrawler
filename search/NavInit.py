@@ -32,9 +32,9 @@ def get_g_page_config(content: str):
     GpcNav = checkNode(GpcNav, 'nav')
     GpcNav = checkNode(GpcNav, 'data')
     GpcNav = checkNode(GpcNav, 'common')
-    for common in GpcNav:
+    for i, common in enumerate(GpcNav):
         if common['text'] == '品牌':
-            GpcNav = checkNode(GpcNav, 'sub')
+            GpcNav = checkNode(GpcNav[i], 'sub')
             break
     return GpcNav
 
