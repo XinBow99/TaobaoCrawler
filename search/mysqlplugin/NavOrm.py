@@ -9,7 +9,7 @@ from sqlalchemy.sql.sqltypes import DATETIME, INTEGER, TEXT
 import yaml
 
 yamlData = None
-with open("mysql.yaml", "r", encoding="utf-8") as stream:
+with open("./mysqlplugin/mysql.yaml", "r", encoding="utf-8") as stream:
     yamlData = yaml.load(stream, Loader=yaml.FullLoader)
     stream.close()
     print("Yaml data loading complete!")
