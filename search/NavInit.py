@@ -102,7 +102,7 @@ class taobao:
         brands = get_g_page_config(pageSource)
         newRows = []
         for brand in brands:
-            print(brands['text'])
+            print(brand['text'])
             exists = self.NavDBSession.query(
                 NavOrm.Navs
             ).filter_by(
