@@ -87,7 +87,7 @@ class taobao:
         '''
         print("[getFirstPageNav]載入關鍵字 {}".format(self.key))
         self.driver.get("https://s.taobao.com/search?q={}".format(self.key))
-        pageSource = self.driver.page_source.encode('utf-8')
+        pageSource = self.driver.page_source
         get_g_page_config(pageSource)
 
     def closeDriver(self):
