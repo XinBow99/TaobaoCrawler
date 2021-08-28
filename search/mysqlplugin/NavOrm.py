@@ -7,6 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.pool import NullPool
 from sqlalchemy.sql.sqltypes import DATETIME, INTEGER, TEXT
 import yaml
+import datetime
 
 yamlData = None
 with open("./mysqlplugin/mysql.yaml", "r", encoding="utf-8") as stream:
@@ -31,7 +32,7 @@ class Navs(Base):
     ppath = Column(TEXT, nullable=True)
     createAt = Column(DATETIME)
 
-    def __init__(self, brand, ppath, timestamp):
+    def __init__(self, brand, ppath):
         self.brand = brand
         self.ppath = ppath
-        self.createAt = timestamp
+        self.createAt = datetime.datetime.now()
