@@ -30,9 +30,9 @@ class Gmail:
         Logo = '''
         <p align="center">
             <a href="" rel="noopener">
-                <img width=200px height=200px src="./DemoPhotos/robot.png" alt="Project logo"></a>
+                <img width=200px height=200px src="https://raw.githubusercontent.com/XinBow99/TaobaoCrawler/main/search/crawler.png" alt="Project logo"></a>
             </p>
-        <h3 align="center">POPDOG BOT</h3><br>
+        <h3 align="center">TaobaoCrawler</h3><br>
         '''
         server.send_message(Logo + msg)
         server.quit()
