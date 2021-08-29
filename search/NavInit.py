@@ -6,7 +6,6 @@ import subprocess
 import threading
 import json
 import gmail
-import VerifyUnlocker
 # 自動化控制
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -131,7 +130,7 @@ class taobao:
             PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
             MSG = re.findall(r"msg: '(.*?)',", content)[0]
             # 先嘗試進行解塊，若出現False，則拋出錯誤
-            UnlockResult = VerifyUnlocker.Unlocker()
+            UnlockResult = self.Unlocker()
             if not UnlockResult[0]:
                 self.NavDBSession.add(
                     NavOrm.Verifys(
@@ -223,13 +222,12 @@ class taobao:
             buttonLocation = button.location
             print("[滑塊位置]", buttonLocation)
             # 設定拖曳結束位置
-            EndXlocation = verifySpanSize['width']
             dragAction = ActionChains(self.driver)
             dragSource = self.driver.find_element_by_xpath(
                 '//*[@id="nc_1_n1z"]')
             # 按住按鈕
             dragAction.click_and_hold(dragSource)
-            dragAction.move_by_offset(EndXlocation, 0)
+            dragAction.move_by_offset(300, 0)
             # 放鬆按鈕
             dragAction.release().perform()
             # 給Flag
