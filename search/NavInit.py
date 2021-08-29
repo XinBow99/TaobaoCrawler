@@ -81,12 +81,13 @@ def get_g_page_config(content: str) -> list:
 
 
 class taobao:
-    def __init__(self, key: str, sendMailTitle: str) -> None:
+    def __init__(self, key: str, sendMailTitle: str, port: int) -> None:
         """初始化對於NAV的抓取
 
         Args:
             key (str): 針對何種產品進行抓取
             sendMailTitle (str): 抓取完畢所寄送之標題為何
+            port (int): Driver之PORT
         """
         self.key = key
         self.sendMailTitle = sendMailTitle
@@ -94,6 +95,7 @@ class taobao:
         print('[__init__]瀏覽器初始化中..')
         # 負責初始化瀏覽器的部分
         self.driver = None
+        self.port = port
         self.initBrowser()
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
@@ -110,6 +112,9 @@ class taobao:
         """
         # 設定給予瀏覽器的options
         options = webdriver.ChromeOptions()
+        # 設置控制通訊埠
+        options.add_experimental_option(
+            "debuggerAddress", "127.0.0.1:{}".format(self.port))
         # 獲取本地的User名稱
         ServerUserName = getpass.getuser()
         # 給予chromedriver需要讀取的資料
@@ -125,6 +130,17 @@ class taobao:
         self.driver = webdriver.Chrome(
             executable_path="drivers/chromedriver.exe",
             chrome_options=options
+        )
+        # 攔截檢測代碼
+        self.driver.execute_cdp_cmd(
+            "Page.addScriptToEvaluateOnNewDocument",
+            {
+                "source": """
+              Object.defineProperty(navigator, 'webdriver', {
+              get: () => undefined
+              })
+              """
+            }
         )
 
     def TestUrl(self):
@@ -213,6 +229,12 @@ if __name__ == "__main__":
         help="設置該程序的EmailTitle",
         default="[淘寶爬蟲]品牌更新作業"
     )
+    CrawlerArgsParser.add_argument(
+        "-p",
+        "--port",
+        type=int,
+        help="設置爬蟲之CHROME控制通訊埠",
+    )
 
     def checkArgsNone(arg):
         if arg == None:
@@ -220,4 +242,5 @@ if __name__ == "__main__":
     CrawlerArgs = CrawlerArgsParser.parse_args()
     checkArgsNone(CrawlerArgs.key)
     checkArgsNone(CrawlerArgs.EmailTitle)
-    taobao(CrawlerArgs.key, CrawlerArgs.EmailTitle)
+    checkArgsNone(CrawlerArgs.port)
+    taobao(CrawlerArgs.key, CrawlerArgs.EmailTitle, CrawlerArgs.port)
