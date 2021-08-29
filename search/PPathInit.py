@@ -153,7 +153,9 @@ class taobao:
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
         self.initBrowser()
+        # 設定解鎖所需之參數
         VerifyUnlocker.driver = self.driver
+        VerifyUnlocker.key = self.key
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()
