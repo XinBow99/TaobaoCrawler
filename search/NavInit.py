@@ -9,14 +9,13 @@ import gmail
 from selenium import webdriver
 
 
-def get_g_page_config(content: str):
+def get_g_page_config(content: str) -> list:
     """抓取網頁原始碼內的g_page_config，並針對Nav進行抓取
 
     Args:
         content (str): 搜尋部分的淘寶網頁原始碼
-
     Returns:
-        dict: 回傳顯示於NAV的所有品牌
+        list: 回傳顯示於NAV的所有品牌
     """
     if "g_page_config" not in content:
         return {
@@ -45,13 +44,15 @@ def get_g_page_config(content: str):
 
 
 class taobao:
-    def __init__(self, key: str) -> None:
+    def __init__(self, key: str, sendMailTitle: str) -> None:
         """初始化對於NAV的抓取
 
         Args:
             key (str): 針對何種產品進行抓取
+            sendMailTitle (str): 抓取完畢所寄送之標題為何
         """
         self.key = key
+        self.sendMailTitle = sendMailTitle
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
         # 負責初始化瀏覽器的部分
@@ -137,7 +138,8 @@ class taobao:
                 updates += exists
         self.NavDBSession.commit()
         self.NavDBSession.close()
-        MailString = open("./config/NavStrings.txt", "r", encoding="utf-8").read()
+        MailString = open("./config/NavStrings.txt",
+                          "r", encoding="utf-8").read()
         MailString = MailString.format(
             len(brands),
             len(newRows),
@@ -146,7 +148,7 @@ class taobao:
         )
         # 發送Email
         gmail.GInit().sendMsg(
-            "[淘寶爬蟲]品牌更新作業",
+            self.sendMailTitle,
             MailString
         )
 
@@ -167,10 +169,18 @@ if __name__ == "__main__":
         type=str,
         help="爬取之關鍵字"
     )
+    CrawlerArgsParser.add_argument(
+        "-t",
+        "--EmailTitle",
+        type=str,
+        help="設置該程序的EmailTitle",
+        default="[淘寶爬蟲]品牌更新作業"
+    )
 
     def checkArgsNone(arg):
         if arg == None:
             sys.exit("請確認輸入參數是否正確")
     CrawlerArgs = CrawlerArgsParser.parse_args()
     checkArgsNone(CrawlerArgs.key)
+    checkArgsNone(CrawlerArgs.EmailTitle)
     taobao(CrawlerArgs.key)
