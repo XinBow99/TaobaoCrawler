@@ -186,6 +186,7 @@ class taobao:
         # brand
         # ppath
         for result in queryByKeyList:
+            print('[INFO]->', result.brand)
             # 切換頁面
             self.driver.get(
                 "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
