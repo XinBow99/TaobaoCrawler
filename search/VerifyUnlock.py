@@ -58,3 +58,6 @@ def initBrowser():
     action.move_by_offset(300, 0)
     action.release().perform()
     time.sleep(1)
+
+
+initBrowser()
