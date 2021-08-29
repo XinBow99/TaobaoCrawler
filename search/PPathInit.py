@@ -170,6 +170,12 @@ class taobao:
         subprocess.call(
             ["RunNavChrome.bat"])
 
+    def runUnlockVerify(self):
+        """遇上後跑解除
+        """
+        subprocess.call(
+            ["UnlockVerifyTabaoSearch.bat"])
+
     def initBrowser(self):
         """初始化爬蟲所需的webdriver
         """
