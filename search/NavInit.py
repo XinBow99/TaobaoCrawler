@@ -100,13 +100,13 @@ class taobao:
         self.sendMailTitle = sendMailTitle
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
+        # 負責初始化瀏覽器的部分
+        self.driver = None
+        self.port = port
         # 打開Chrome
         # 需創建Threading
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
-        # 負責初始化瀏覽器的部分
-        self.driver = None
-        self.port = port
         self.initBrowser()
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
