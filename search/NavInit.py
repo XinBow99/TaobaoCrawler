@@ -9,6 +9,41 @@ import gmail
 from selenium import webdriver
 
 
+class VerifyError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+        MailString = open("./config/GetVerify.txt",
+                          "r", encoding="utf-8").read()
+        MailString = MailString.format(
+            args[0]['HOST'],
+            args[0]['PATH'],
+            args[0]['MSG']
+        )
+        # 發送Email
+        gmail.GInit().sendMsg(
+            "[淘寶爬蟲]驗證攔截",
+            MailString
+        )
+
+
+def checkVerify(content: str) -> None:
+    """判斷網頁原始碼是被阻擋
+
+    Args:
+        content (str): 網頁原始碼
+    """
+    # msg: '霸下通用 web 页面-验证码',
+    if '"action": "captcha"' in content:
+        HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
+        PATH = re.findall(r'"HOST": "(.*?)",', content)[0]
+        MSG = re.findall(r"msg: '(.*?)',", content)[0]
+        raise VerifyError({
+            "HOST": HOST,
+            "PATH": PATH,
+            "MSG": MSG
+        })
+
+
 def get_g_page_config(content: str) -> list:
     """抓取網頁原始碼內的g_page_config，並針對Nav進行抓取
 
@@ -17,6 +52,8 @@ def get_g_page_config(content: str) -> list:
     Returns:
         list: 回傳顯示於NAV的所有品牌
     """
+    # 先判斷是否被阻擋
+    checkVerify(content)
     if "g_page_config" not in content:
         return {
             'status': 0,
