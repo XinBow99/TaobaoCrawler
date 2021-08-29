@@ -12,6 +12,8 @@ def Unlocker():
     """
     SuccessFlag = False
     SuccessMessage = "解除成功"
+    print("[窗口狀態]最大化")
+    driver.maximize_window()
     try:
         # verifySpan: 獲取滑塊
         verifySpan = driver.find_element_by_xpath(
