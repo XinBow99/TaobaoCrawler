@@ -66,6 +66,7 @@ def Unlocker():
                 Unlocker()
         # 給Flag
         driver.get(lastUrl)
+        time.sleep(5)
         SuccessFlag = True
     except Exception as e:
         SuccessMessage = str(e)
