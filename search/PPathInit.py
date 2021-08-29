@@ -78,8 +78,20 @@ def get_g_page_config(content: str) -> list:
         # 未來需放try catch
         return jsonContent
     GpcNav = checkNode(GpcNav, 'mods')
+    _temp = GpcNav
     GpcNav = checkNode(GpcNav, 'pager')
-    print(GpcNav)
+    if 'status' in GpcNav:
+        if GpcNav['status'] == "hide":
+            pager = {}
+            # 因為產品太少 所以只找一頁 故以auctions替代Size
+            _temp = checkNode(GpcNav, 'itemlist')
+            _temp = checkNode(GpcNav, 'data')
+            _temp = checkNode(GpcNav, 'auctions')
+            pager['pageSize']       = len(_temp)
+            pager['totalPage']      = 1
+            pager['currentPage']    = 1
+            pager['totalCount']     = len(_temp)
+            return pager
     GpcNav = checkNode(GpcNav, 'data')
     return GpcNav
 
@@ -200,11 +212,11 @@ class taobao:
             # by brand
             self.NavDBSession.add(
                 NavOrm.Pagers(
-                    brand       = result.brand,
-                    pageSize    = pager['pageSize'],
-                    totalPage   = pager['totalPage'],
-                    currentPage = pager['currentPage'],
-                    totalCount  = pager['totalCount']
+                    brand=result.brand,
+                    pageSize=pager['pageSize'],
+                    totalPage=pager['totalPage'],
+                    currentPage=pager['currentPage'],
+                    totalCount=pager['totalCount']
                 )
             )
             # 各項請求需休息5秒，否則會被擋下來
