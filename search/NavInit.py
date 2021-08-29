@@ -122,7 +122,7 @@ class taobao:
         """以Bash的方式打開一個Chrome
         """
         subprocess.call(
-            ['chrome.exe --remote-debugging-port={} --user-data-dir="../ChromeDirs"'.format(self.port)])
+            ["RunNavChrome.bat"])
 
     def initBrowser(self):
         """初始化爬蟲所需的webdriver
