@@ -24,12 +24,11 @@ def Unlocker():
         buttonLocation = button.location
         print("[滑塊位置]", buttonLocation)
         # 設定拖曳結束位置
-        EndXlocation = verifySpanSize['width']
         dragAction = ActionChains(driver)
         dragSource = driver.find_element_by_xpath('//*[@id="nc_1_n1z"]')
         # 按住按鈕
-        dragAction.click_and_hold(dragSource)
-        dragAction.move_by_offset(EndXlocation, 0)
+        dragAction.click_and_hold(dragSource).perform()
+        dragAction.move_by_offset(300, 0)
         # 放鬆按鈕
         dragAction.release().perform()
         # 給Flag
