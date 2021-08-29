@@ -42,6 +42,12 @@ def checkVerify(content: str) -> None:
             "PATH": PATH,
             "MSG": MSG
         })
+    elif '/newlogin/login.do' in content:
+        raise VerifyError({
+            "HOST": "login.taobao.com",
+            "PATH": "member/login.jhtml",
+            "MSG": "尚未登入淘寶！"
+        })
 
 
 def get_g_page_config(content: str) -> list:
