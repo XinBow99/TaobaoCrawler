@@ -137,7 +137,7 @@ class taobao:
                 updates += exists
         self.NavDBSession.commit()
         self.NavDBSession.close()
-        MailString = open("NavStrings.txt", "r", encoding="utf-8").read()
+        MailString = open("./config/NavStrings.txt", "r", encoding="utf-8").read()
         MailString = MailString.format(
             len(brands),
             len(newRows),
