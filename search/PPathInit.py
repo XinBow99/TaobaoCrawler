@@ -206,6 +206,7 @@ class taobao:
             executable_path="drivers/chromedriver.exe",
             chrome_options=options
         )
+        self.driver.implicitly_wait(30)
         # 攔截webdriver之檢測代碼
         self.driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
