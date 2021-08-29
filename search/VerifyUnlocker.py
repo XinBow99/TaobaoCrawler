@@ -1,10 +1,12 @@
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
+import random
 # 儲存DRIVER
 driver = None
 key = None
 lastUrl = None
+
 
 def freshPageToSearch(driver):
     """針對超過一次無法進行解鎖而設計之
@@ -13,6 +15,7 @@ def freshPageToSearch(driver):
         driver (chromedrive): 瀏覽器控制權
     """
     driver.get("https://s.taobao.com/")
+    time.sleep(3)
     # 找搜尋的框框
     driver.find_element_by_xpath('//*[@id="q"]').send_keys(key, Keys.ENTER)
     time.sleep(3)
@@ -47,11 +50,20 @@ def Unlocker():
         dragAction.move_by_offset(300, 0)
         # 放鬆按鈕
         dragAction.release().perform()
-        time.sleep(3)
+        time.sleep(random.randint(5, 15))
         # 檢查是否確實消除
         if '"action": "captcha"' in driver.page_source:
-            freshPageToSearch(driver=driver)
-            Unlocker()
+            shouldGetOnce = [1, 2, 3]
+            shouldGetOnce = random.choice(shouldGetOnce)
+            if shouldGetOnce == 1:
+                freshPageToSearch(driver=driver)
+                Unlocker()
+            elif shouldGetOnce == 2:
+                Unlocker()
+            else:
+                freshPageToSearch(driver=driver)
+                time.sleep(3)
+                Unlocker()
         # 給Flag
         driver.get(lastUrl)
         SuccessFlag = True
