@@ -29,10 +29,6 @@ class VerifyError(Exception):
         )
 
 
-# 存取創建之Class
-gTaobaoSession = None
-
-
 def checkVerify(content: str) -> None:
     """判斷網頁原始碼是被阻擋
 
@@ -40,7 +36,8 @@ def checkVerify(content: str) -> None:
         content (str): 網頁原始碼
     """
     # msg: '霸下通用 web 页面-验证码',
-    dbSession = gTaobaoSession.getCurrentDBsession()
+    DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
+    dbSession = DBSession()
     if '"action": "captcha"' in content:
         # 寫入遇到滑塊時間，記錄之
         dbSession.add(
@@ -86,6 +83,7 @@ def checkVerify(content: str) -> None:
         )
         dbSession.commit()
         dbSession.close()
+
         raise VerifyError({
             "HOST": "login.taobao.com",
             "PATH": "member/login.jhtml",
@@ -156,6 +154,7 @@ class taobao:
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
         self.initBrowser()
+        VerifyUnlocker.driver = self.driver
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()

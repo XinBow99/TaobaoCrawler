@@ -39,7 +39,8 @@ def checkVerify(content: str) -> None:
         content (str): 網頁原始碼
     """
     # msg: '霸下通用 web 页面-验证码',
-    dbSession = gTaobaoSession.getCurrentDBsession()
+    DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
+    dbSession = DBSession()
     if '"action": "captcha"' in content:
         # 寫入遇到滑塊時間，記錄之
         dbSession.add(
@@ -76,6 +77,21 @@ def checkVerify(content: str) -> None:
         )
         dbSession.commit()
         dbSession.close()
+    elif '/newlogin/login.do' in content:
+        dbSession.add(
+            NavOrm.Verifys(
+                status=4,
+                msg="尚未登入淘寶！"
+            )
+        )
+        dbSession.commit()
+        dbSession.close()
+
+        raise VerifyError({
+            "HOST": "login.taobao.com",
+            "PATH": "member/login.jhtml",
+            "MSG": "尚未登入淘寶！"
+        })
 
 
 def get_g_page_config(content: str) -> list:
@@ -135,6 +151,7 @@ class taobao:
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
         self.initBrowser()
+        VerifyUnlocker.driver = self.driver
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()
@@ -255,22 +272,6 @@ class taobao:
             self.sendMailTitle,
             MailString
         )
-
-    def getCurrentDriver(self):
-        """回傳正在使用的Driver
-
-        Returns:
-            Chrome: 目前正在使用的Chrome
-        """
-        return self.driver
-
-    def getCurrentDBsession(self):
-        """回傳正在使用的DBsession
-
-        Returns:
-            DBsession: 目前正在使用的DBsession
-        """
-        return self.NavDBSession
 
     def closeDriver(self):
         """結束Chrome driver

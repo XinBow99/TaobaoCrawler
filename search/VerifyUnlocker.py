@@ -1,10 +1,10 @@
-# 自動化控制
-from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 import time
+# 儲存DRIVER
+driver = None
 
 
-def Unlocker(driver):
+def Unlocker():
     """負責解搜尋頁面的店小二
 
     Args:
@@ -39,7 +39,7 @@ def Unlocker(driver):
     return (SuccessFlag, SuccessMessage)
 
 
-def TmallUnlock(driver):
+def TmallUnlock():
     """負責解除商品以及評論之Function
 
     Args:
