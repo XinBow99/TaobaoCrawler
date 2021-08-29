@@ -153,6 +153,7 @@ class taobao:
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
         self.initBrowser()
+        VerifyUnlocker.driver = self.driver
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()
@@ -169,12 +170,6 @@ class taobao:
         """
         subprocess.call(
             ["RunNavChrome.bat"])
-
-    def runUnlockVerify(self):
-        """遇上後跑解除
-        """
-        subprocess.call(
-            ["UnlockVerifyTabaoSearch.bat"])
 
     def initBrowser(self):
         """初始化爬蟲所需的webdriver

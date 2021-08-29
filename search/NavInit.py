@@ -6,9 +6,9 @@ import subprocess
 import threading
 import json
 import gmail
+import VerifyUnlocker
 # 自動化控制
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
 
 
 class VerifyError(Exception):
@@ -32,6 +32,103 @@ class VerifyError(Exception):
 gTaobaoSession = None
 
 
+def checkVerify(content: str) -> None:
+    """判斷網頁原始碼是被阻擋
+
+    Args:
+        content (str): 網頁原始碼
+    """
+    # msg: '霸下通用 web 页面-验证码',
+    DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
+    dbSession = DBSession()
+    if '"action": "captcha"' in content:
+        # 寫入遇到滑塊時間，記錄之
+        dbSession.add(
+            NavOrm.Verifys(
+                status=0,
+                msg="遇到滑塊"
+            )
+        )
+        HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
+        PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
+        MSG = re.findall(r"msg: '(.*?)',", content)[0]
+        # 先嘗試進行解塊，若出現False，則拋出錯誤
+        UnlockResult = VerifyUnlocker.Unlocker()
+        if not UnlockResult[0]:
+            dbSession.add(
+                NavOrm.Verifys(
+                    status=2,
+                    msg=MSG + "\n" + UnlockResult[1]
+                )
+            )
+            dbSession.commit()
+            dbSession.close()
+            raise VerifyError({
+                "HOST": HOST,
+                "PATH": PATH,
+                "MSG": MSG + "\n" + UnlockResult[1]
+            })
+        dbSession.add(
+            NavOrm.Verifys(
+                status=1,
+                msg=UnlockResult[1]
+            )
+        )
+        dbSession.commit()
+        dbSession.close()
+    elif '/newlogin/login.do' in content:
+        dbSession.add(
+            NavOrm.Verifys(
+                status=4,
+                msg="尚未登入淘寶！"
+            )
+        )
+        dbSession.commit()
+        dbSession.close()
+
+        raise VerifyError({
+            "HOST": "login.taobao.com",
+            "PATH": "member/login.jhtml",
+            "MSG": "尚未登入淘寶！"
+        })
+
+
+def get_g_page_config(content: str) -> list:
+    """抓取網頁原始碼內的g_page_config，並針對Nav進行抓取
+
+    Args:
+        content (str): 搜尋部分的淘寶網頁原始碼
+    Returns:
+        list: 回傳顯示於NAV的所有品牌
+    """
+    # 先判斷是否被阻擋
+    checkVerify(content)
+    if "g_page_config" not in content:
+        return {
+            'status': 0,
+            'function': 'get_g_page_config',
+            'msg': '網頁內容不正確'
+        }
+    gpcRe = re.findall(pattern=r'g_page_config \= (.*)\;',
+                       string=content.strip().strip("\n"))[0]
+    GpcNav = json.loads(gpcRe)
+
+    def checkNode(jsonContent, checkKey):
+        if checkKey in jsonContent:
+            return jsonContent[checkKey]
+        # 未來需放try catch
+        return jsonContent
+    GpcNav = checkNode(GpcNav, 'mods')
+    GpcNav = checkNode(GpcNav, 'nav')
+    GpcNav = checkNode(GpcNav, 'data')
+    GpcNav = checkNode(GpcNav, 'common')
+    for i, common in enumerate(GpcNav):
+        if common['text'] == '品牌':
+            GpcNav = checkNode(GpcNav[i], 'sub')
+            break
+    return GpcNav
+
+
 class taobao:
     def __init__(self, key: str, sendMailTitle: str, port: int) -> None:
         """初始化對於NAV的抓取
@@ -53,6 +150,7 @@ class taobao:
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
         self.initBrowser()
+        VerifyUnlocker.driver = self.driver
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()
@@ -111,131 +209,6 @@ class taobao:
         """
         self.driver.get("https://www.google.com")
 
-    def checkVerify(self, content: str) -> None:
-        """判斷網頁原始碼是被阻擋
-
-        Args:
-            content (str): 網頁原始碼
-        """
-        # msg: '霸下通用 web 页面-验证码',
-        if '"action": "captcha"' in content:
-            # 寫入遇到滑塊時間，記錄之
-            self.NavDBSession.add(
-                NavOrm.Verifys(
-                    status=0,
-                    msg="遇到滑塊"
-                )
-            )
-            HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
-            PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
-            MSG = re.findall(r"msg: '(.*?)',", content)[0]
-            # 先嘗試進行解塊，若出現False，則拋出錯誤
-            UnlockResult = self.Unlocker()
-            if not UnlockResult[0]:
-                self.NavDBSession.add(
-                    NavOrm.Verifys(
-                        status=2,
-                        msg=MSG + "\n" + UnlockResult[1]
-                    )
-                )
-                self.NavDBSession.commit()
-                raise VerifyError({
-                    "HOST": HOST,
-                    "PATH": PATH,
-                    "MSG": MSG + "\n" + UnlockResult[1]
-                })
-            self.NavDBSession.add(
-                NavOrm.Verifys(
-                    status=1,
-                    msg=UnlockResult[1]
-                )
-            )
-            self.NavDBSession.commit()
-        elif '/newlogin/login.do' in content:
-            self.NavDBSession.add(
-                NavOrm.Verifys(
-                    status=4,
-                    msg="尚未登入淘寶！"
-                )
-            )
-            self.NavDBSession.commit()
-
-            raise VerifyError({
-                "HOST": "login.taobao.com",
-                "PATH": "member/login.jhtml",
-                "MSG": "尚未登入淘寶！"
-            })
-
-    def get_g_page_config(self, content: str) -> list:
-        """抓取網頁原始碼內的g_page_config，並針對Nav進行抓取
-
-        Args:
-            content (str): 搜尋部分的淘寶網頁原始碼
-        Returns:
-            list: 回傳顯示於NAV的所有品牌
-        """
-        # 先判斷是否被阻擋
-        self.checkVerify(content)
-        if "g_page_config" not in content:
-            return {
-                'status': 0,
-                'function': 'get_g_page_config',
-                'msg': '網頁內容不正確'
-            }
-        gpcRe = re.findall(pattern=r'g_page_config \= (.*)\;',
-                           string=content.strip().strip("\n"))[0]
-        GpcNav = json.loads(gpcRe)
-
-        def checkNode(jsonContent, checkKey):
-            if checkKey in jsonContent:
-                return jsonContent[checkKey]
-            # 未來需放try catch
-            return jsonContent
-        GpcNav = checkNode(GpcNav, 'mods')
-        GpcNav = checkNode(GpcNav, 'nav')
-        GpcNav = checkNode(GpcNav, 'data')
-        GpcNav = checkNode(GpcNav, 'common')
-        for i, common in enumerate(GpcNav):
-            if common['text'] == '品牌':
-                GpcNav = checkNode(GpcNav[i], 'sub')
-                break
-        return GpcNav
-
-    def Unlocker(self):
-        """負責解搜尋頁面的店小二
-
-        Args:
-            driver (webdriver): 目前正在使用的driver
-        """
-        SuccessFlag = False
-        SuccessMessage = "解除成功"
-
-        try:
-            # verifySpan: 獲取滑塊
-            verifySpan = self.driver.find_element_by_xpath(
-                '//*[@id="nc_1__scale_text"]/span')
-            # verifySpanSize: 滑塊的大小
-            verifySpanSize = verifySpan.size
-            print("[獲取滑塊]", verifySpanSize)
-            # 擷取滑塊按鈕>>
-            button = self.driver.find_element_by_xpath('//*[@id="nc_1_n1z"]')
-            buttonLocation = button.location
-            print("[滑塊位置]", buttonLocation)
-            # 設定拖曳結束位置
-            dragAction = ActionChains(self.driver)
-            dragSource = self.driver.find_element_by_xpath(
-                '//*[@id="nc_1_n1z"]')
-            # 按住按鈕
-            dragAction.click_and_hold(dragSource)
-            dragAction.move_by_offset(300, 0)
-            # 放鬆按鈕
-            dragAction.release().perform()
-            # 給Flag
-            SuccessFlag = True
-        except Exception as e:
-            SuccessMessage = str(e)
-        return (SuccessFlag, SuccessMessage)
-
     def getFirstPageNavService(self):
         """
         - 獲取需儲存之品牌Nav
@@ -253,7 +226,7 @@ class taobao:
         # 取得搜尋的原始碼
         pageSource = self.driver.page_source
         # 獲取顯示於上列的所有廠商
-        brands = self.get_g_page_config(pageSource)
+        brands = get_g_page_config(pageSource)
         # 看有多少列被更新
         newRows = []
         #
