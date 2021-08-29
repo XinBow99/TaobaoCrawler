@@ -28,18 +28,21 @@ print("ORM INIT complete!")
 class Navs(Base):
     __tablename__ = yamlData['navTable']
     __table_args__ = {"mysql_charset": "utf8"}
+    search_key = Column(TEXT, nullable=True)
     brand = Column(TEXT, primary_key=True)
     ppath = Column(TEXT, nullable=True)
     createAt = Column(DATETIME)
     updateAt = Column(DATETIME)
 
-    def __init__(self, brand, ppath):
+    def __init__(self, search_key: str, brand: str, ppath: str):
         """Navs寫入之參數
 
         Args:
+            search_key (str): 產品名稱
             brand (str): 廠牌名稱
             ppath (str): 廠牌之金鑰
         """
+        self.search_key = search_key
         self.brand = brand
         self.ppath = ppath
         self.createAt = datetime.datetime.now()

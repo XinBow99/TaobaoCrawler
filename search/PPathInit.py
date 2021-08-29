@@ -52,12 +52,12 @@ def checkVerify(content: str) -> None:
 
 
 def get_g_page_config(content: str) -> list:
-    """抓取網頁原始碼內的g_page_config，並針對Nav進行抓取
+    """抓取網頁原始碼內的g_page_config，並針對pager進行抓取
 
     Args:
         content (str): 搜尋部分的淘寶網頁原始碼
     Returns:
-        list: 回傳顯示於NAV的所有品牌
+        dict: 回傳pager參數
     """
     # 先判斷是否被阻擋
     checkVerify(content)
@@ -77,19 +77,14 @@ def get_g_page_config(content: str) -> list:
         # 未來需放try catch
         return jsonContent
     GpcNav = checkNode(GpcNav, 'mods')
-    GpcNav = checkNode(GpcNav, 'nav')
+    GpcNav = checkNode(GpcNav, 'pager')
     GpcNav = checkNode(GpcNav, 'data')
-    GpcNav = checkNode(GpcNav, 'common')
-    for i, common in enumerate(GpcNav):
-        if common['text'] == '品牌':
-            GpcNav = checkNode(GpcNav[i], 'sub')
-            break
     return GpcNav
 
 
 class taobao:
     def __init__(self, key: str, sendMailTitle: str, port: int) -> None:
-        """初始化對於NAV的抓取
+        """初始化對於pager的抓取
 
         Args:
             key (str): 針對何種產品進行抓取
@@ -166,24 +161,28 @@ class taobao:
         """
         self.driver.get("https://www.google.com")
 
-    def getFirstPageNavService(self):
+    def getNavPagerService(self):
         """
-        - 獲取需儲存之品牌Nav
-        - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2
+        - 獲取需儲存之品牌pager
+        - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2&tab=mall&sort=sale-desc&ppath={}
         - 並將結果儲存至DB內
         - 同時傳送完畢的Email訊息
         """
-        print("[getFirstPageNavService]載入關鍵字 {}".format(self.key))
+        print("[getNavPagerService]載入關鍵字 {}".format(self.key))
         # 將chrome切換至search的頁面
         # q     : key
         # tab   : 標籤
         # sort  : 排序方式
+        # ppath : 品牌
         self.driver.get(
-            "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc".format(self.key))
+            "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
+                self.key
+            )
+        )
         # 取得搜尋的原始碼
         pageSource = self.driver.page_source
         # 獲取顯示於上列的所有廠商
-        brands = get_g_page_config(pageSource)
+        pager = get_g_page_config(pageSource)
         # 看有多少列被更新
         newRows = []
         #
