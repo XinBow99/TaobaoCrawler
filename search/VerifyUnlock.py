@@ -39,6 +39,10 @@ def initBrowser():
                 """
         }
     )
+    iframe = driver.find_element_by_xpath('//*[@id="J_sufei"]/iframe')
+    print(iframe)
+    driver.switch_to.frame(iframe)
+    time.sleep(2)
     # 滑塊POC
     span_background = driver.find_element_by_xpath(
         '//*[@id="nc_1__scale_text"]/span')
