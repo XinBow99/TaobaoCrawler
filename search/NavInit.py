@@ -122,12 +122,12 @@ class taobao:
         options.add_experimental_option(
             "debuggerAddress", "127.0.0.1:{}".format(self.port))
         # 獲取本地的User名稱
-        ServerUserName = getpass.getuser()
+        # ServerUserName = getpass.getuser()
         # 給予chromedriver需要讀取的資料
-        OriginChromePath = "C:\\Users\\{}\\AppData\\Local\\Google\\Chrome\\User Data".format(
-            ServerUserName)
+        # OriginChromePath = "C:\\Users\\{}\\AppData\\Local\\Google\\Chrome\\User Data".format(
+        #    ServerUserName)
         # 加入arg
-        options.add_argument("user-data-dir={}".format(OriginChromePath))
+        # options.add_argument("user-data-dir={}".format(OriginChromePath))
         # options.add_argument('--headless')
         # options.add_argument('--no-sandbox')
         # options.add_argument('--disable-gpu')
