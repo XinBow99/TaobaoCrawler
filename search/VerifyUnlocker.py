@@ -1,10 +1,49 @@
 from selenium.webdriver.common.action_chains import ActionChains
+# 自動化控制
+from selenium import webdriver
 import time
-# 儲存DRIVER
-driver = None
+port = 10001
 
 
-def Unlocker():
+def initBrowser():
+    """初始化爬蟲所需的webdriver
+    """
+    # 設定給予瀏覽器的options
+    options = webdriver.ChromeOptions()
+    # 設置控制通訊埠
+    options.add_experimental_option(
+        "debuggerAddress", "127.0.0.1:{}".format(port))
+    # 獲取本地的User名稱
+    # ServerUserName = getpass.getuser()
+    # 給予chromedriver需要讀取的資料
+    # OriginChromePath = "C:\\Users\\{}\\AppData\\Local\\Google\\Chrome\\User Data".format(
+    #    ServerUserName)
+    # 加入arg
+    # options.add_argument("user-data-dir={}".format(OriginChromePath))
+    # options.add_argument('--headless')
+    # options.add_argument('--no-sandbox')
+    # options.add_argument('--disable-gpu')
+    # options.add_argument('--disable-dev-shm-usage')
+    # 創建一個driver
+    driver = webdriver.Chrome(
+        executable_path="drivers/chromedriver.exe",
+        chrome_options=options
+    )
+    # 攔截webdriver之檢測代碼
+    driver.execute_cdp_cmd(
+        "Page.addScriptToEvaluateOnNewDocument",
+        {
+            "source": """
+                Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+                })
+                """
+        }
+    )
+    return driver
+
+
+def Unlocker(driver=None):
     """負責解搜尋頁面的店小二
 
     Args:
@@ -12,6 +51,8 @@ def Unlocker():
     """
     SuccessFlag = False
     SuccessMessage = "解除成功"
+    if not driver:
+        driver = initBrowser()
     try:
         # verifySpan: 獲取滑塊
         verifySpan = driver.find_element_by_xpath(
@@ -45,6 +86,7 @@ def TmallUnlock():
     Args:
         driver (webdriver): 目前正在使用的driver
     """
+    driver = initBrowser()
     # 該頁面有嵌入iframe，必須要先進行切換
     iframe = driver.find_element_by_xpath('//*[@id="J_sufei"]/iframe')
     # main->iframe
