@@ -109,7 +109,7 @@ class taobao:
         self.TestUrl()
         print('[__init__]初始化完畢！')
         print('==============================')
-        self.getFirstPageNavService()
+        self.getNavPagerService()
         self.closeDriver()
         chromeThreading.join()
 
