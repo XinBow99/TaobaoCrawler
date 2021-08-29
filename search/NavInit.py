@@ -67,6 +67,7 @@ def checkVerify(content: str) -> None:
             if VerifyRefreshTimes < 10:
                 VerifyRefreshTimes += 1
                 print("[嘗試解鎖]{}/10".format(VerifyRefreshTimes))
+                VerifyUnlocker.driver.navigate().refresh()
                 checkVerify(content)
             raise VerifyError({
                 "HOST": HOST,
