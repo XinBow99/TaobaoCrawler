@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import create_engine
 # sqlalchemy 查詢前連結，结束後，調用 session.close() 關閉連結
 from sqlalchemy.pool import NullPool
-from sqlalchemy.sql.sqltypes import DATETIME, INTEGER, TEXT
+from sqlalchemy.sql.sqltypes import DATETIME, INT, INTEGER, TEXT
 import yaml
 import datetime
 
@@ -51,6 +51,7 @@ class Navs(Base):
 class Pagers(Base):
     __tablename__ = yamlData['pagerTable']
     __table_args__ = {"mysql_charset": "utf8"}
+    _id         = Column(INTEGER, primary_key=True)
     brand       = Column(TEXT)
     pageSize    = Column(INTEGER)
     totalPage   = Column(INTEGER)
