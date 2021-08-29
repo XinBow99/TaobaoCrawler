@@ -183,4 +183,4 @@ if __name__ == "__main__":
     CrawlerArgs = CrawlerArgsParser.parse_args()
     checkArgsNone(CrawlerArgs.key)
     checkArgsNone(CrawlerArgs.EmailTitle)
-    taobao(CrawlerArgs.key)
+    taobao(CrawlerArgs.key, CrawlerArgs.EmailTitle)
