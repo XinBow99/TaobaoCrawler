@@ -34,6 +34,12 @@ class Navs(Base):
     updateAt = Column(DATETIME)
 
     def __init__(self, brand, ppath):
+        """Navs寫入之參數
+
+        Args:
+            brand (str): 廠牌名稱
+            ppath (str): 廠牌之金鑰
+        """
         self.brand = brand
         self.ppath = ppath
         self.createAt = datetime.datetime.now()

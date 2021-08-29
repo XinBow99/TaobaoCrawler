@@ -10,10 +10,14 @@ from selenium import webdriver
 
 
 def get_g_page_config(content: str):
-    '''
-    取得該頁面的g_page_config
-    - content: 網頁內容
-    '''
+    """抓取網頁原始碼內的g_page_config，並針對Nav進行抓取
+
+    Args:
+        content (str): 搜尋部分的淘寶網頁原始碼
+
+    Returns:
+        dict: 回傳顯示於NAV的所有品牌
+    """
     if "g_page_config" not in content:
         return {
             'status': 0,
@@ -42,10 +46,11 @@ def get_g_page_config(content: str):
 
 class taobao:
     def __init__(self, key: str) -> None:
-        '''
-        該方法用於初始化淘寶搜索，必須輸入查詢之key以及使用者的headers的txt
-        - key: 搜索之物品
-        '''
+        """初始化對於NAV的抓取
+
+        Args:
+            key (str): 針對何種產品進行抓取
+        """
         self.key = key
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
@@ -63,9 +68,8 @@ class taobao:
         self.closeDriver()
 
     def initBrowser(self):
-        '''
-        初始化chrome的瀏覽器...
-        '''
+        """初始化爬蟲所需的webdriver
+        """
         # 設定給予瀏覽器的options
         options = webdriver.ChromeOptions()
         # 獲取本地的User名稱
@@ -86,40 +90,54 @@ class taobao:
         )
 
     def TestUrl(self):
-        '''
-        測試瀏覽器是否正常運行
-        '''
+        """進行driver的網頁測試是否正常
+        """
         self.driver.get("https://www.google.com")
 
     def getFirstPageNavService(self):
-        '''
-        獲取需儲存之品牌Nav
-        https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2
-        '''
+        """
+        - 獲取需儲存之品牌Nav
+        - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2
+        - 並將結果儲存至DB內
+        - 同時傳送完畢的Email訊息
+        """
         print("[getFirstPageNavService]載入關鍵字 {}".format(self.key))
+        # 將chrome切換至search的頁面
         self.driver.get("https://s.taobao.com/search?q={}".format(self.key))
+        # 取得搜尋的原始碼
         pageSource = self.driver.page_source
+        # 獲取顯示於上列的所有廠商
         brands = get_g_page_config(pageSource)
+        # 看有多少列被更新
         newRows = []
+        #
         updates = 0
         for brand in brands:
             print(brand['text'])
             exists = self.NavDBSession.query(
+                # 查詢Navs的資料表
                 NavOrm.Navs
             ).filter_by(
+                # 用廠牌進行filter
                 brand=brand['text']
             ).update(
+                # 更新ppath這個參數
                 {"ppath": brand['value']}
             )
+            # 如果找不到brand
             if not exists:
-                self.NavDBSession.add(NavOrm.Navs(
-                    brand['text'], brand['value']))
+                # 使用添加
+                self.NavDBSession.add(
+                    NavOrm.Navs(
+                        brand['text'], brand['value']
+                    )
+                )
                 newRows.append(brand['text'])
             else:
-                updates += 1
+                updates += exists
         self.NavDBSession.commit()
         self.NavDBSession.close()
-        MailString = '''
+        MailString = """
         <div>
             <strong>
         [總和]獲取{}項品牌
@@ -148,18 +166,21 @@ class taobao:
             <strong>
         [更新頻率]Once a day
             </strong>
-        </div>'''.format(
+        </div>""".format(
             len(brands),
             len(newRows),
             "、".join(newRows),
             updates
         )
+        # 發送Email
         gmail.GInit().sendMsg(
             "[淘寶爬蟲]品牌更新作業",
             MailString
         )
 
     def closeDriver(self):
+        """結束Chrome driver
+        """
         self.driver.close()
         self.driver.quit()
         print("[CloseDriver]結束Nav抓取")
