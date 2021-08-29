@@ -61,6 +61,7 @@ def Unlocker():
         time.sleep(random.randint(5, 15))
         # 檢查是否確實消除
         if '"action": "captcha"' in driver.page_source:
+            driver.refresh()
             Unlocker()
         # 給Flag
         driver.get(lastUrl)
