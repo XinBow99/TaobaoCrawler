@@ -50,8 +50,7 @@ def checkVerify(content: str) -> None:
         PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
         MSG = re.findall(r"msg: '(.*?)',", content)[0]
         # 先嘗試進行解塊，若出現False，則拋出錯誤
-        UnlockResult = VerifyUnlocker.Unlocker(
-            gTaobaoSession.getCurrentDriver())
+        UnlockResult = VerifyUnlocker.Unlocker()
         if not UnlockResult[0]:
             dbSession.add(
                 NavOrm.Verifys(
