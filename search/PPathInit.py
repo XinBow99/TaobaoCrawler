@@ -84,16 +84,14 @@ def get_g_page_config(content: str) -> list:
 
 
 class taobao:
-    def __init__(self, key: str, sendMailTitle: str, port: int) -> None:
+    def __init__(self, key: str, port: int) -> None:
         """初始化對於pager的抓取
 
         Args:
             key (str): 針對何種產品進行抓取
-            sendMailTitle (str): 抓取完畢所寄送之標題為何
             port (int): Driver之PORT
         """
         self.key = key
-        self.sendMailTitle = sendMailTitle
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
         # 負責初始化瀏覽器的部分
@@ -252,6 +250,5 @@ if __name__ == "__main__":
     checkArgsNone(CrawlerArgs.port)
     taobao(
         key=CrawlerArgs.key,
-        sendMailTitle=CrawlerArgs.EmailTitle,
         port=CrawlerArgs.port
     )
