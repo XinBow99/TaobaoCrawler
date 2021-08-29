@@ -34,5 +34,5 @@ class Gmail:
         server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
         server.ehlo()
         server.login(self.gmail_user, self.gmail_password)
-        server.send_message(msg)
+        #server.send_message(msg)
         server.quit()

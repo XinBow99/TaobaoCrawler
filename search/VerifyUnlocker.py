@@ -12,7 +12,7 @@ def initBrowser():
     options = webdriver.ChromeOptions()
     # 設置控制通訊埠
     options.add_experimental_option(
-        "debuggerAddress", "127.0.0.1:{}".format(port))
+        "debuggerAddress", "127.0.0.1:{}".format(10001))
     # 獲取本地的User名稱
     # ServerUserName = getpass.getuser()
     # 給予chromedriver需要讀取的資料
