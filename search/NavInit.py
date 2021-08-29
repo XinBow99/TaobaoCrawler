@@ -35,7 +35,7 @@ def checkVerify(content: str) -> None:
     # msg: '霸下通用 web 页面-验证码',
     if '"action": "captcha"' in content:
         HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
-        PATH = re.findall(r'"HOST": "(.*?)",', content)[0]
+        PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
         MSG = re.findall(r"msg: '(.*?)',", content)[0]
         raise VerifyError({
             "HOST": HOST,
