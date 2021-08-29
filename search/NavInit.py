@@ -30,7 +30,6 @@ class VerifyError(Exception):
 
 # 存取創建之Class
 gTaobaoSession = None
-VerifyRefreshTimes = 0
 
 
 def checkVerify(content: str) -> None:
@@ -39,7 +38,6 @@ def checkVerify(content: str) -> None:
     Args:
         content (str): 網頁原始碼
     """
-    global VerifyRefreshTimes
     # msg: '霸下通用 web 页面-验证码',
     DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
     dbSession = DBSession()
@@ -65,9 +63,6 @@ def checkVerify(content: str) -> None:
             )
             dbSession.commit()
             dbSession.close()
-            if VerifyRefreshTimes < 10:
-                VerifyRefreshTimes += 1
-                get_g_page_config(content)
             raise VerifyError({
                 "HOST": HOST,
                 "PATH": PATH,

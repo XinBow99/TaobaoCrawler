@@ -33,6 +33,11 @@ def Unlocker():
         dragAction.move_by_offset(300, 0)
         # 放鬆按鈕
         dragAction.release().perform()
+        time.sleep(3)
+        # 檢查是否確實消除
+        if '"action": "captcha"' in driver.page_source:
+            driver.refresh()
+            Unlocker()
         # 給Flag
         SuccessFlag = True
     except Exception as e:
@@ -51,4 +56,4 @@ def TmallUnlock():
     # main->iframe
     driver.switch_to.frame(iframe)
     time.sleep(2)
-    return Unlocker(driver)
+    return Unlocker()
