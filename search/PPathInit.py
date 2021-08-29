@@ -79,8 +79,8 @@ def get_g_page_config(content: str) -> list:
         return jsonContent
     GpcNav = checkNode(GpcNav, 'mods')
     GpcNav = checkNode(GpcNav, 'pager')
-    GpcNav = checkNode(GpcNav, 'data')
     print(GpcNav)
+    GpcNav = checkNode(GpcNav, 'data')
     return GpcNav
 
 
