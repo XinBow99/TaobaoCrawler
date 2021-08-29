@@ -19,28 +19,28 @@ yamlData = yamlData['Database']
 
 
 # DB的資訊
-DBInfo = f"mysql+pymysql://{yamlData['userName']}:{yamlData['userPwd']}@{yamlData['ip']}/{yamlData['databaseName']}?charset=utf8mb4"
-DBLink = create_engine(DBInfo, poolclass=NullPool)
-Base = declarative_base()
+DBInfo  = f"mysql+pymysql://{yamlData['userName']}:{yamlData['userPwd']}@{yamlData['ip']}/{yamlData['databaseName']}?charset=utf8mb4"
+DBLink  = create_engine(DBInfo, poolclass=NullPool)
+Base    = declarative_base()
 print("ORM INIT complete!")
 
 
 class Navs(Base):
-    __tablename__ = yamlData['navTable']
-    __table_args__ = {"mysql_charset": "utf8"}
-    search_key  = Column(TEXT, nullable=True)
-    brand       = Column(TEXT, primary_key=True)
-    ppath       = Column(TEXT, nullable=True)
-    createAt    = Column(DATETIME)
-    updateAt    = Column(DATETIME)
+    __tablename__   = yamlData['navTable']
+    __table_args__  = {"mysql_charset": "utf8"}
+    search_key      = Column(TEXT, nullable=True)
+    brand           = Column(TEXT, primary_key=True)
+    ppath           = Column(TEXT, nullable=True)
+    createAt        = Column(DATETIME)
+    updateAt        = Column(DATETIME)
 
     def __init__(self, search_key: str, brand: str, ppath: str):
         """Navs寫入之參數
 
         Args:
             search_key (str): 產品名稱
-            brand (str): 廠牌名稱
-            ppath (str): 廠牌之金鑰
+            brand (str)     : 廠牌名稱
+            ppath (str)     : 廠牌之金鑰
         """
         self.search_key = search_key
         self.brand      = brand
@@ -49,25 +49,25 @@ class Navs(Base):
 
 
 class Pagers(Base):
-    __tablename__ = yamlData['pagerTable']
-    __table_args__ = {"mysql_charset": "utf8"}
-    _id         = Column(INTEGER, primary_key=True)
-    brand       = Column(TEXT)
-    pageSize    = Column(INTEGER)
-    totalPage   = Column(INTEGER)
-    currentPage = Column(INTEGER)
-    totalCount  = Column(INTEGER)
-    createAt    = Column(DATETIME)
+    __tablename__   = yamlData['pagerTable']
+    __table_args__  = {"mysql_charset": "utf8"}
+    _id             = Column(INTEGER, primary_key=True)
+    brand           = Column(TEXT)
+    pageSize        = Column(INTEGER)
+    totalPage       = Column(INTEGER)
+    currentPage     = Column(INTEGER)
+    totalCount      = Column(INTEGER)
+    createAt        = Column(DATETIME)
 
     def __init__(self, brand: str, pageSize: int, totalPage: int, currentPage: int, totalCount: int):
         """寫入Pagers資料表
 
         Args:
-            brand (str): 廠牌名稱
-            pageSize (int): 有多少樣產品
-            totalPage (int): 共有幾頁
-            currentPage (int): 目前頁數
-            totalCount (int): 所有產品數量
+            brand (str)         : 廠牌名稱
+            pageSize (int)      : 有多少樣產品
+            totalPage (int)     : 共有幾頁
+            currentPage (int)   : 目前頁數
+            totalCount (int)    : 所有產品數量
         """
         self.brand          = brand
         self.pageSize       = pageSize
@@ -75,3 +75,23 @@ class Pagers(Base):
         self.currentPage    = currentPage
         self.totalCount     = totalCount
         self.createAt       = datetime.datetime.now()
+
+
+class Verifys(Base):
+    __tablename__   = yamlData['verifyTable']
+    __table_args__  = {"mysql_charset": "utf8"}
+    _id             = Column(INTEGER, primary_key=True)
+    status          = Column(INTEGER)
+    msg             = Column(TEXT)
+    createAt        = Column(DATETIME)
+
+    def __init__(self, status: int, msg: str):
+        """存取遇到滑塊之紀錄ORM
+
+        Args:
+            status (int): 寫入之狀態，以int作為表示
+            msg (str)   : 單純作為紀錄訊息用
+        """
+        self.status     = status
+        self.msg        = msg
+        self.createAt   = datetime.datetime.now()

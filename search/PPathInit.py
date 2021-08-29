@@ -7,6 +7,7 @@ import threading
 import json
 import gmail
 import time
+import VerifyUnlocker
 # 自動化控制
 from selenium import webdriver
 
@@ -28,6 +29,10 @@ class VerifyError(Exception):
         )
 
 
+# 存取創建之Class
+gTaobaoSession = None
+
+
 def checkVerify(content: str) -> None:
     """判斷網頁原始碼是被阻擋
 
@@ -35,16 +40,52 @@ def checkVerify(content: str) -> None:
         content (str): 網頁原始碼
     """
     # msg: '霸下通用 web 页面-验证码',
+    dbSession = gTaobaoSession.getCurrentDBsession()
     if '"action": "captcha"' in content:
+        # 寫入遇到滑塊時間，記錄之
+        dbSession.add(
+            NavOrm.Verifys(
+                status=0,
+                msg="遇到滑塊"
+            )
+        )
         HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
         PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
         MSG = re.findall(r"msg: '(.*?)',", content)[0]
-        raise VerifyError({
-            "HOST": HOST,
-            "PATH": PATH,
-            "MSG": MSG
-        })
+        # 先嘗試進行解塊，若出現False，則拋出錯誤
+        UnlockResult = VerifyUnlocker.Unlocker(
+            gTaobaoSession.getCurrentDriver())
+        if not UnlockResult[0]:
+            dbSession.add(
+                NavOrm.Verifys(
+                    status=2,
+                    msg=MSG + "\n" + UnlockResult[1]
+                )
+            )
+            dbSession.commit()
+            dbSession.close()
+            raise VerifyError({
+                "HOST": HOST,
+                "PATH": PATH,
+                "MSG": MSG + "\n" + UnlockResult[1]
+            })
+        dbSession.add(
+            NavOrm.Verifys(
+                status=1,
+                msg=UnlockResult[1]
+            )
+        )
+        dbSession.commit()
+        dbSession.close()
     elif '/newlogin/login.do' in content:
+        dbSession.add(
+            NavOrm.Verifys(
+                status=4,
+                msg="尚未登入淘寶！"
+            )
+        )
+        dbSession.commit()
+        dbSession.close()
         raise VerifyError({
             "HOST": "login.taobao.com",
             "PATH": "member/login.jhtml",
@@ -87,10 +128,10 @@ def get_g_page_config(content: str) -> list:
             _temp = checkNode(GpcNav, 'itemlist')
             _temp = checkNode(GpcNav, 'data')
             _temp = checkNode(GpcNav, 'auctions')
-            pager['pageSize']       = len(_temp)
-            pager['totalPage']      = 1
-            pager['currentPage']    = 1
-            pager['totalCount']     = len(_temp)
+            pager['pageSize'] = len(_temp)
+            pager['totalPage'] = 1
+            pager['currentPage'] = 1
+            pager['totalCount'] = len(_temp)
             return pager
     GpcNav = checkNode(GpcNav, 'data')
     return GpcNav
@@ -224,6 +265,22 @@ class taobao:
             time.sleep(5)
         self.NavDBSession.close()
 
+    def getCurrentDriver(self):
+        """回傳正在使用的Driver
+
+        Returns:
+            Chrome: 目前正在使用的Chrome
+        """
+        return self.driver
+
+    def getCurrentDBsession(self):
+        """回傳正在使用的DBsession
+
+        Returns:
+            DBsession: 目前正在使用的DBsession
+        """
+        return self.NavDBSession
+
     def closeDriver(self):
         """結束Chrome driver
         """
@@ -262,7 +319,7 @@ if __name__ == "__main__":
     checkArgsNone(CrawlerArgs.key)
     checkArgsNone(CrawlerArgs.EmailTitle)
     checkArgsNone(CrawlerArgs.port)
-    taobao(
+    gTaobaoSession = taobao(
         key=CrawlerArgs.key,
         port=CrawlerArgs.port
     )
