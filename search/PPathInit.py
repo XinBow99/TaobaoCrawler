@@ -6,6 +6,7 @@ import subprocess
 import threading
 import json
 import gmail
+import time
 # 自動化控制
 from selenium import webdriver
 
@@ -149,10 +150,10 @@ class taobao:
             "Page.addScriptToEvaluateOnNewDocument",
             {
                 "source": """
-              Object.defineProperty(navigator, 'webdriver', {
-              get: () => undefined
-              })
-              """
+                Object.defineProperty(navigator, 'webdriver', {
+                get: () => undefined
+                })
+                """
             }
         )
 
@@ -174,59 +175,42 @@ class taobao:
         # tab   : 標籤
         # sort  : 排序方式
         # ppath : 品牌
-        self.driver.get(
-            "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
-                self.key
-            )
-        )
-        # 取得搜尋的原始碼
-        pageSource = self.driver.page_source
-        # 獲取顯示於上列的所有廠商
-        pager = get_g_page_config(pageSource)
-        # 看有多少列被更新
-        newRows = []
-        #
-        updates = 0
-        for brand in brands:
-            print(brand['text'])
-            exists = self.NavDBSession.query(
-                # 查詢Navs的資料表
-                NavOrm.Navs
-            ).filter_by(
-                # 用廠牌進行filter
-                brand=brand['text']
-            ).update(
-                # 更新ppath這個參數
-                {"ppath": brand['value']}
-            )
-            # 如果找不到brand
-            if not exists:
-                # 使用添加
-                self.NavDBSession.add(
-                    NavOrm.Navs(
-                        search_key=self.key,
-                        brand=brand['text'],
-                        ppath=brand['value']
-                    )
+        # 先query出所有為key的list
+        queryByKeyList = self.NavDBSession.query(
+            # 查詢Navs的資料表
+            NavOrm.Navs
+        ).filter_by(
+            search_key="尿褲"
+        ).all()
+        # 枚舉result
+        # search_key
+        # brand
+        # ppath
+        for result in queryByKeyList:
+            # 切換頁面
+            self.driver.get(
+                "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
+                    self.key,
+                    result.ppath
                 )
-                newRows.append(brand['text'])
-            else:
-                updates += exists
-        self.NavDBSession.commit()
+            )
+            pageSource = self.driver.page_source
+            pager = get_g_page_config(pageSource)
+            # 取得pager後寫入資料庫
+            # by brand
+            self.NavDBSession.add(
+                NavOrm.Pagers(
+                    brand       = result.brand,
+                    pageSize    = pager['pageSize'],
+                    totalPage   = pager['totalPage'],
+                    currentPage = pager['currentPage'],
+                    totalCount  = pager['totalCount']
+                )
+            )
+            # 各項請求需休息5秒，否則會被擋下來
+            self.NavDBSession.commit()
+            time.sleep(5)
         self.NavDBSession.close()
-        MailString = open("./config/NavStrings.txt",
-                          "r", encoding="utf-8").read()
-        MailString = MailString.format(
-            len(brands),
-            len(newRows),
-            "、".join(newRows),
-            updates
-        )
-        # 發送Email
-        gmail.GInit().sendMsg(
-            self.sendMailTitle,
-            MailString
-        )
 
     def closeDriver(self):
         """結束Chrome driver
