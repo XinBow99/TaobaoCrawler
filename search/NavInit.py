@@ -2,7 +2,8 @@ from mysqlplugin import NavOrm
 import argparse
 import re
 import sys
-import getpass
+import subprocess
+import threading
 import json
 import gmail
 # 自動化控制
@@ -99,6 +100,10 @@ class taobao:
         self.sendMailTitle = sendMailTitle
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
+        # 打開Chrome
+        # 需創建Threading
+        chromeThreading = threading.Thread(target=self.createChromeBrowser)
+        chromeThreading.start()
         # 負責初始化瀏覽器的部分
         self.driver = None
         self.port = port
@@ -112,6 +117,12 @@ class taobao:
         print('==============================')
         self.getFirstPageNavService()
         self.closeDriver()
+
+    def createChromeBrowser(self):
+        """以Bash的方式打開一個Chrome
+        """
+        subprocess.call(
+            ['chrome.exe --remote-debugging-port={} --user-data-dir="../ChromeDirs"'.format(self.port)])
 
     def initBrowser(self):
         """初始化爬蟲所需的webdriver
