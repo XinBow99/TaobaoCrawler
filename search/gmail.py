@@ -2,6 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import yaml
+import requests
 
 
 def GInit():
@@ -21,7 +22,8 @@ class Gmail:
         self.gmail_password = self.yamlData['Sender']['key']
 
     def sendMsg(self, subject="ErrorMsg", content="content"):
-        Logo = open('./Logo.html','r',encoding='utf-8').read()
+        Logo = requests.get(
+            "https://raw.githubusercontent.com/XinBow99/TaobaoCrawler/main/PublicForGithub/Logo.html").text
         Logo = Logo.replace('$content', content)
         msg = MIMEMultipart('alternative')
         msg['Subject'] = subject
