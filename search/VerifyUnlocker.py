@@ -4,7 +4,7 @@ import time
 # 儲存DRIVER
 driver = None
 key = None
-
+lastUrl = None
 
 def freshPageToSearch(driver):
     """針對超過一次無法進行解鎖而設計之
@@ -53,6 +53,7 @@ def Unlocker():
             freshPageToSearch(driver=driver)
             Unlocker()
         # 給Flag
+        driver.get(lastUrl)
         SuccessFlag = True
     except Exception as e:
         SuccessMessage = str(e)

@@ -32,11 +32,18 @@ class VerifyError(Exception):
 gTaobaoSession = None
 
 
-def checkVerify(content: str) -> None:
+def checkVerify(content: str) -> str:
     """判斷網頁原始碼是被阻擋
 
     Args:
         content (str): 網頁原始碼
+
+    Raises:
+        VerifyError: 驗證失敗
+        VerifyError: 遇到登入
+
+    Returns:
+        str: 成功解鎖之網頁
     """
     # msg: '霸下通用 web 页面-验证码',
     DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
@@ -76,6 +83,7 @@ def checkVerify(content: str) -> None:
         )
         dbSession.commit()
         dbSession.close()
+        return VerifyUnlocker.driver.page_source
     elif '/newlogin/login.do' in content:
         dbSession.add(
             NavOrm.Verifys(
@@ -91,6 +99,7 @@ def checkVerify(content: str) -> None:
             "PATH": "member/login.jhtml",
             "MSG": "尚未登入淘寶！"
         })
+    return content
 
 
 def get_g_page_config(content: str) -> list:
@@ -102,7 +111,7 @@ def get_g_page_config(content: str) -> list:
         list: 回傳顯示於NAV的所有品牌
     """
     # 先判斷是否被阻擋
-    checkVerify(content)
+    content = checkVerify(content)
     if "g_page_config" not in content:
         return {
             'status': 0,
@@ -150,6 +159,7 @@ class taobao:
         chromeThreading = threading.Thread(target=self.createChromeBrowser)
         chromeThreading.start()
         self.initBrowser()
+        # 設定解鎖所需之參數
         VerifyUnlocker.driver = self.driver
         VerifyUnlocker.key = self.key
         print('[__init__]資料庫初始化中..')
@@ -223,8 +233,11 @@ class taobao:
         # q     : key
         # tab   : 標籤
         # sort  : 排序方式
-        self.driver.get(
-            "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc".format(self.key))
+        ConnentUrl = "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc".format(
+            self.key)
+        self.driver.get(ConnentUrl)
+        # 預防爆炸，並設定最後一個訪問的網址，如果解鎖則傳送之
+        VerifyUnlocker.lastUrl = ConnentUrl
         # 取得搜尋的原始碼
         pageSource = self.driver.page_source
         # 獲取顯示於上列的所有廠商

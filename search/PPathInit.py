@@ -29,11 +29,18 @@ class VerifyError(Exception):
         )
 
 
-def checkVerify(content: str) -> None:
+def checkVerify(content: str) -> str:
     """判斷網頁原始碼是被阻擋
 
     Args:
         content (str): 網頁原始碼
+
+    Raises:
+        VerifyError: 驗證失敗
+        VerifyError: 遇到登入
+
+    Returns:
+        str: 成功解鎖之網頁
     """
     # msg: '霸下通用 web 页面-验证码',
     DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
@@ -73,6 +80,7 @@ def checkVerify(content: str) -> None:
         )
         dbSession.commit()
         dbSession.close()
+        return VerifyUnlocker.driver.page_source
     elif '/newlogin/login.do' in content:
         dbSession.add(
             NavOrm.Verifys(
@@ -88,6 +96,7 @@ def checkVerify(content: str) -> None:
             "PATH": "member/login.jhtml",
             "MSG": "尚未登入淘寶！"
         })
+    return content
 
 
 def get_g_page_config(content: str) -> list:
@@ -99,7 +108,7 @@ def get_g_page_config(content: str) -> list:
         dict: 回傳pager參數
     """
     # 先判斷是否被阻擋
-    checkVerify(content)
+    content = checkVerify(content)
     if "g_page_config" not in content:
         return {
             'status': 0,
