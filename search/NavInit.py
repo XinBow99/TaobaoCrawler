@@ -32,6 +32,7 @@ class VerifyError(Exception):
 gTaobaoSession = None
 VerifyRefreshTimes = 0
 
+
 def checkVerify(content: str) -> None:
     """判斷網頁原始碼是被阻擋
 
@@ -66,9 +67,7 @@ def checkVerify(content: str) -> None:
             dbSession.close()
             if VerifyRefreshTimes < 10:
                 VerifyRefreshTimes += 1
-                print("[嘗試解鎖]{}/10".format(VerifyRefreshTimes))
-                VerifyUnlocker.driver.navigate().refresh()
-                checkVerify(content)
+                get_g_page_config(content)
             raise VerifyError({
                 "HOST": HOST,
                 "PATH": PATH,
