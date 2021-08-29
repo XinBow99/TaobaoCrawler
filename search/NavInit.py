@@ -137,36 +137,8 @@ class taobao:
                 updates += exists
         self.NavDBSession.commit()
         self.NavDBSession.close()
-        MailString = """
-        <div>
-            <strong>
-        [總和]獲取{}項品牌
-            </strong>
-        </div>
-        <div>
-            <strong>
-        [新增]{}項</strong>
-        </div>
-        <div>
-            <strong>
-        {}
-            </strong>
-        </div>
-        <div>
-            <strong>
-        [更新品牌參數]{}項
-            </strong>
-        </div>
-        <div>
-            <strong>
-        ------------
-            </strong>
-        </div>
-        <div>
-            <strong>
-        [更新頻率]Once a day
-            </strong>
-        </div>""".format(
+        MailString = open("NavStrings.txt", "r", encoding="utf-8").read()
+        MailString = MailString.format(
             len(brands),
             len(newRows),
             "、".join(newRows),
