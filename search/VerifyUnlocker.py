@@ -47,24 +47,21 @@ def Unlocker():
         dragAction = ActionChains(driver)
         dragSource = driver.find_element_by_xpath('//*[@id="nc_1_n1z"]')
         # 按住按鈕
-        dragAction.click_and_hold(dragSource).perform()
-        dragAction.move_by_offset(300, 0)
+        dragAction.click_and_hold(dragSource)
+        offsetSum = 0
+        while True:
+            x = random.randint(0, 10)
+            dragAction.move_by_offset(x, 0)
+            time.sleep((random.randint(1, 2))/10)
+            offsetSum += x
+            if offsetSum >= 280:
+                break
         # 放鬆按鈕
         dragAction.release().perform()
         time.sleep(random.randint(5, 15))
         # 檢查是否確實消除
         if '"action": "captcha"' in driver.page_source:
-            shouldGetOnce = [1, 2, 3]
-            shouldGetOnce = random.choice(shouldGetOnce)
-            if shouldGetOnce == 1:
-                freshPageToSearch(driver=driver)
-                Unlocker()
-            elif shouldGetOnce == 2:
-                Unlocker()
-            else:
-                freshPageToSearch(driver=driver)
-                time.sleep(3)
-                Unlocker()
+            Unlocker()
         # 給Flag
         driver.get(lastUrl)
         time.sleep(5)
