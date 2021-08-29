@@ -13,7 +13,7 @@ def GInit():
 class Gmail:
     def __init__(self):
         self.yamlData = None
-        with open("./gmail.yaml", "r", encoding="utf-8") as stream:
+        with open("./config/gmail.yaml", "r", encoding="utf-8") as stream:
             self.yamlData = yaml.load(stream, Loader=yaml.FullLoader)
             stream.close()
         # 寄件者帳號
