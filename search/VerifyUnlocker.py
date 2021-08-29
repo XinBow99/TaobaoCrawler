@@ -14,11 +14,12 @@ def freshPageToSearch(driver):
     Args:
         driver (chromedrive): 瀏覽器控制權
     """
+    driver.refresh()
     driver.get("https://s.taobao.com/")
-    time.sleep(3)
+    time.sleep(1)
     # 找搜尋的框框
     driver.find_element_by_xpath('//*[@id="q"]').send_keys(key, Keys.ENTER)
-    time.sleep(3)
+    time.sleep(1)
 
 
 def Unlocker():
