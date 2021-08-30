@@ -239,6 +239,12 @@ if __name__ == "__main__":
         default="[淘寶爬蟲]品牌更新作業"
     )
     CrawlerArgsParser.add_argument(
+        "-ip",
+        "--ip",
+        type=str,
+        help="遠程控制需要用到的chrome"
+    )
+    CrawlerArgsParser.add_argument(
         "-p",
         "--port",
         type=int,
@@ -251,9 +257,11 @@ if __name__ == "__main__":
     CrawlerArgs = CrawlerArgsParser.parse_args()
     checkArgsNone(CrawlerArgs.key)
     checkArgsNone(CrawlerArgs.EmailTitle)
+    checkArgsNone(CrawlerArgs.ip)
     checkArgsNone(CrawlerArgs.port)
     gTaobaoSession = taobao(
         key=CrawlerArgs.key,
         sendMailTitle=CrawlerArgs.EmailTitle,
+        ip=CrawlerArgs.key,
         port=CrawlerArgs.port
     )

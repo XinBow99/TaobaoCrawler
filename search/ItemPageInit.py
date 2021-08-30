@@ -282,8 +282,7 @@ if __name__ == "__main__":
         "-ip",
         "--ip",
         type=str,
-        help="遠程控制需要用到的chrome",
-        default="127.0.0.1"
+        help="遠程控制需要用到的chrome"
     )
     CrawlerArgsParser.add_argument(
         "-p",
