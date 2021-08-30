@@ -109,6 +109,7 @@ class taobao:
         # 打開Chrome
         if ip == "127.0.0.1":
             # 需創建Threading
+            print("[創建Session]For Chrome")
             chromeThreading = threading.Thread(target=self.createChromeBrowser)
             chromeThreading.start()
         # 初始化Browser
