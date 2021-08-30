@@ -101,13 +101,5 @@ class checkVerify:
             })
         return content
 
-
-class chromeDriverInformation:
-    """chrome driver的設定參數
-    """
-    ip = None
-    port = None
-    drive = None
-
 # 通用型程式碼結束
 ##########################################################################################

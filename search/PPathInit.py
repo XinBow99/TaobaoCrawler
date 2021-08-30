@@ -7,7 +7,7 @@ import threading
 import json
 import gmail
 import time
-from PublicFunctions import chromeDriverInformation, VerifyUnlocker, checkVerify
+from PublicFunctions import VerifyUnlocker, checkVerify
 # 自動化控制
 from selenium import webdriver
 
@@ -80,9 +80,6 @@ class taobao:
         self.key = key
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
-        # 負責初始化瀏覽器的部分
-        chromeDriverInformation.ip = ip
-        chromeDriverInformation.port = port
         # 打開Chrome
         if ip == "127.0.0.1":
             # 需創建Threading
@@ -90,9 +87,12 @@ class taobao:
             chromeThreading = threading.Thread(target=self.createChromeBrowser)
             chromeThreading.start()
         # 初始化Browser
+        self.ip = ip
+        self.port = port
+        self.driver = None
         self.initBrowser()
         # 設定解鎖所需之參數
-        VerifyUnlocker.driver = chromeDriverInformation.drive
+        VerifyUnlocker.driver = self.driver
         VerifyUnlocker.key = self.key
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
@@ -123,8 +123,8 @@ class taobao:
         # 設置控制通訊埠
         options.add_experimental_option(
             "debuggerAddress", "{}:{}".format(
-                chromeDriverInformation.ip,
-                chromeDriverInformation.port
+                self.ip,
+                self.port
             ))
         # 獲取本地的User名稱
         # ServerUserName = getpass.getuser()
@@ -138,13 +138,13 @@ class taobao:
         # options.add_argument('--disable-gpu')
         # options.add_argument('--disable-dev-shm-usage')
         # 創建一個driver
-        chromeDriverInformation.drive = webdriver.Chrome(
+        self.driver = webdriver.Chrome(
             executable_path="drivers/chromedriver.exe",
             chrome_options=options
         )
-        chromeDriverInformation.drive.implicitly_wait(30)
+        self.driver.implicitly_wait(30)
         # 攔截webdriver之檢測代碼
-        chromeDriverInformation.drive.execute_cdp_cmd(
+        self.driver.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {
                 "source": """
@@ -158,7 +158,7 @@ class taobao:
     def TestUrl(self):
         """進行driver的網頁測試是否正常
         """
-        chromeDriverInformation.drive.get("https://www.google.com")
+        self.driver.get("https://www.google.com")
 
     def getNavPagerService(self):
         """
@@ -187,13 +187,13 @@ class taobao:
         for result in queryByKeyList:
             print('[INFO]->', result.brand)
             # 切換頁面
-            chromeDriverInformation.drive.get(
+            self.driver.get(
                 "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
                     self.key,
                     result.ppath
                 )
             )
-            pageSource = chromeDriverInformation.drive.page_source
+            pageSource = self.driver.page_source
             pager = get_g_page_config(pageSource)
             # 取得pager後寫入資料庫
             # by brand
@@ -217,7 +217,7 @@ class taobao:
         Returns:
             Chrome: 目前正在使用的Chrome
         """
-        return chromeDriverInformation.drive
+        return self.driver
 
     def getCurrentDBsession(self):
         """回傳正在使用的DBsession
@@ -230,8 +230,8 @@ class taobao:
     def closeDriver(self):
         """結束Chrome driver
         """
-        chromeDriverInformation.drive.close()
-        chromeDriverInformation.drive.quit()
+        self.driver.close()
+        self.driver.quit()
         print("[CloseDriver]結束Nav抓取")
 
 
