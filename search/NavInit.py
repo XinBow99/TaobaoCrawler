@@ -94,7 +94,7 @@ class taobao:
         self.TestUrl()
         print('[__init__]初始化完畢！')
         print('==============================')
-        self.getNavItemsService()
+        self.getFirstPageNavService()
         self.closeDriver()
         chromeThreading.join()
 
