@@ -266,6 +266,6 @@ if __name__ == "__main__":
     gTaobaoSession = taobao(
         key=CrawlerArgs.key,
         sendMailTitle=CrawlerArgs.EmailTitle,
-        ip=CrawlerArgs.key,
+        ip=CrawlerArgs.ip,
         port=CrawlerArgs.port
     )
