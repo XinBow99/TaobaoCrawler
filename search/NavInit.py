@@ -100,8 +100,11 @@ class taobao:
     def createChromeBrowser(self):
         """以Bash的方式打開一個Chrome
         """
-        subprocess.call(
-            ["RunNavChrome.bat"])
+        try:
+            subprocess.call(
+                ["RunNavChrome.bat"])
+        except Exception as e:
+            sys.exit(f"[無法啟動Chrome]{e}")
 
     def initBrowser(self):
         """初始化爬蟲所需的webdriver
