@@ -7,96 +7,9 @@ import threading
 import json
 import gmail
 import time
-import VerifyUnlocker
+from PublicFunctions import chromeDriverInformation, VerifyUnlocker, checkVerify
 # 自動化控制
 from selenium import webdriver
-
-
-class VerifyError(Exception):
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
-        MailString = open("./config/GetVerify.txt",
-                          "r", encoding="utf-8").read()
-        MailString = MailString.format(
-            args[0]['HOST'],
-            args[0]['PATH'],
-            args[0]['MSG']
-        )
-        # 發送Email
-        gmail.GInit().sendMsg(
-            "[淘寶爬蟲]驗證攔截",
-            MailString
-        )
-
-
-def checkVerify(content: str) -> str:
-    """判斷網頁原始碼是被阻擋
-
-    Args:
-        content (str): 網頁原始碼
-
-    Raises:
-        VerifyError: 驗證失敗
-        VerifyError: 遇到登入
-
-    Returns:
-        str: 成功解鎖之網頁
-    """
-    # msg: '霸下通用 web 页面-验证码',
-    DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
-    dbSession = DBSession()
-    if '"action": "captcha"' in content:
-        # 寫入遇到滑塊時間，記錄之
-        dbSession.add(
-            NavOrm.Verifys(
-                status=0,
-                msg="遇到滑塊"
-            )
-        )
-        HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
-        PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
-        MSG = re.findall(r"msg: '(.*?)',", content)[0]
-        # 先嘗試進行解塊，若出現False，則拋出錯誤
-        UnlockResult = VerifyUnlocker.Unlocker()
-        if not UnlockResult[0]:
-            dbSession.add(
-                NavOrm.Verifys(
-                    status=2,
-                    msg=MSG + "\n" + UnlockResult[1]
-                )
-            )
-            dbSession.commit()
-            dbSession.close()
-            raise VerifyError({
-                "HOST": HOST,
-                "PATH": PATH,
-                "MSG": MSG + "\n" + UnlockResult[1]
-            })
-        dbSession.add(
-            NavOrm.Verifys(
-                status=1,
-                msg=UnlockResult[1]
-            )
-        )
-        dbSession.commit()
-        dbSession.close()
-        return VerifyUnlocker.driver.page_source
-    elif '/newlogin/login.do' in content:
-        dbSession.add(
-            NavOrm.Verifys(
-                status=4,
-                msg="尚未登入淘寶！"
-            )
-        )
-        dbSession.commit()
-        dbSession.close()
-
-        raise VerifyError({
-            "HOST": "login.taobao.com",
-            "PATH": "member/login.jhtml",
-            "MSG": "尚未登入淘寶！"
-        })
-    return content
 
 
 def get_g_page_config(content: str) -> list:
@@ -108,7 +21,7 @@ def get_g_page_config(content: str) -> list:
         dict: 回傳pager參數
     """
     # 先判斷是否被阻擋
-    content = checkVerify(content)
+    content = checkVerify.do(content)
     if "g_page_config" not in content:
         return {
             'status': 0,
@@ -144,35 +57,51 @@ def get_g_page_config(content: str) -> list:
 
 
 class taobao:
-    def __init__(self, key: str, port: int) -> None:
+    def __init__(self, key: str, sendMailTitle: str, ip: str, port: int) -> None:
         """初始化對於pager的抓取
 
         Args:
             key (str): 針對何種產品進行抓取
             port (int): Driver之PORT
         """
+        ##############
+        # 下方程式碼可用於 Item, PPath, Nav
+        ##############
+        # 先載入一隻神獸
+        NoBugDragon = open(file="./arts/Nobug.art", mode="r", encoding="utf-8")
+        print("{}\n".format(NoBugDragon.read()))
+        NoBugDragon.close()
+        del NoBugDragon
+        ###############
+        # 設定該Class獨立參數
+        ###############
+        self.sendMailTitl = sendMailTitle
+        ###############
         self.key = key
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
         # 負責初始化瀏覽器的部分
-        self.driver = None
-        self.port = port
+        chromeDriverInformation.ip = ip
+        chromeDriverInformation.port = port
         # 打開Chrome
-        # 需創建Threading
-        chromeThreading = threading.Thread(target=self.createChromeBrowser)
-        chromeThreading.start()
+        if ip == "127.0.0.1":
+            # 需創建Threading
+            chromeThreading = threading.Thread(target=self.createChromeBrowser)
+            chromeThreading.start()
+        # 初始化Browser
         self.initBrowser()
         # 設定解鎖所需之參數
-        VerifyUnlocker.driver = self.driver
+        VerifyUnlocker.driver = chromeDriverInformation.drive
         VerifyUnlocker.key = self.key
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()
+
         print('[__init__]瀏覽器測試中..')
         self.TestUrl()
         print('[__init__]初始化完畢！')
         print('==============================')
-        self.getNavPagerService()
+        self.getNavItemsService()
         self.closeDriver()
         chromeThreading.join()
 
@@ -202,13 +131,13 @@ class taobao:
         # options.add_argument('--disable-gpu')
         # options.add_argument('--disable-dev-shm-usage')
         # 創建一個driver
-        self.driver = webdriver.Chrome(
+        chromeDriverInformation.drive = webdriver.Chrome(
             executable_path="drivers/chromedriver.exe",
             chrome_options=options
         )
-        self.driver.implicitly_wait(30)
+        chromeDriverInformation.drive.implicitly_wait(30)
         # 攔截webdriver之檢測代碼
-        self.driver.execute_cdp_cmd(
+        chromeDriverInformation.drive.execute_cdp_cmd(
             "Page.addScriptToEvaluateOnNewDocument",
             {
                 "source": """
@@ -222,7 +151,7 @@ class taobao:
     def TestUrl(self):
         """進行driver的網頁測試是否正常
         """
-        self.driver.get("https://www.google.com")
+        chromeDriverInformation.drive.get("https://www.google.com")
 
     def getNavPagerService(self):
         """
@@ -251,13 +180,13 @@ class taobao:
         for result in queryByKeyList:
             print('[INFO]->', result.brand)
             # 切換頁面
-            self.driver.get(
+            chromeDriverInformation.drive.get(
                 "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
                     self.key,
                     result.ppath
                 )
             )
-            pageSource = self.driver.page_source
+            pageSource = chromeDriverInformation.drive.page_source
             pager = get_g_page_config(pageSource)
             # 取得pager後寫入資料庫
             # by brand
@@ -281,7 +210,7 @@ class taobao:
         Returns:
             Chrome: 目前正在使用的Chrome
         """
-        return self.driver
+        return chromeDriverInformation.drive
 
     def getCurrentDBsession(self):
         """回傳正在使用的DBsession
@@ -294,8 +223,8 @@ class taobao:
     def closeDriver(self):
         """結束Chrome driver
         """
-        self.driver.close()
-        self.driver.quit()
+        chromeDriverInformation.drive.close()
+        chromeDriverInformation.drive.quit()
         print("[CloseDriver]結束Nav抓取")
 
 
@@ -338,6 +267,7 @@ if __name__ == "__main__":
     checkArgsNone(CrawlerArgs.port)
     gTaobaoSession = taobao(
         key=CrawlerArgs.key,
+        sendMailTitle=CrawlerArgs.EmailTitle,
         ip=CrawlerArgs.key,
         port=CrawlerArgs.port
     )

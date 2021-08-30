@@ -5,9 +5,8 @@ import sys
 import subprocess
 import threading
 import json
-import gmail
 import time
-import VerifyUnlocker
+from PublicFunctions import chromeDriverInformation, VerifyUnlocker, checkVerify
 # 自動化控制
 from selenium import webdriver
 
@@ -33,78 +32,6 @@ from selenium import webdriver
 #                  神獸保佑
 #                程式碼永無BUG!
 ##########################################################################################
-##########################################################################################
-# 通用型程式碼
-
-
-def checkVerify(content: str) -> str:
-    """判斷網頁原始碼是被阻擋
-
-    Args:
-        content (str): 網頁原始碼
-
-    Raises:
-        VerifyError: 驗證失敗
-        VerifyError: 遇到登入
-
-    Returns:
-        str: 成功解鎖之網頁
-    """
-    # msg: '霸下通用 web 页面-验证码',
-    DBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
-    dbSession = DBSession()
-    if '"action": "captcha"' in content:
-        # 寫入遇到滑塊時間，記錄之
-        dbSession.add(
-            NavOrm.Verifys(
-                status=0,
-                msg="遇到滑塊"
-            )
-        )
-        HOST = re.findall(r'"HOST": "(.*?)",', content)[0]
-        PATH = re.findall(r'"PATH": "(.*?)",', content)[0]
-        MSG = re.findall(r"msg: '(.*?)',", content)[0]
-        # 先嘗試進行解塊，若出現False，則拋出錯誤
-        UnlockResult = VerifyUnlocker.Unlocker()
-        if not UnlockResult[0]:
-            dbSession.add(
-                NavOrm.Verifys(
-                    status=2,
-                    msg=MSG + "\n" + UnlockResult[1]
-                )
-            )
-            dbSession.commit()
-            dbSession.close()
-            raise VerifyError({
-                "HOST": HOST,
-                "PATH": PATH,
-                "MSG": MSG + "\n" + UnlockResult[1]
-            })
-        dbSession.add(
-            NavOrm.Verifys(
-                status=1,
-                msg=UnlockResult[1]
-            )
-        )
-        dbSession.commit()
-        dbSession.close()
-        return VerifyUnlocker.driver.page_source
-    elif '/newlogin/login.do' in content:
-        dbSession.add(
-            NavOrm.Verifys(
-                status=4,
-                msg="尚未登入淘寶！"
-            )
-        )
-        dbSession.commit()
-        dbSession.close()
-
-        raise VerifyError({
-            "HOST": "login.taobao.com",
-            "PATH": "member/login.jhtml",
-            "MSG": "尚未登入淘寶！"
-        })
-    return content
 
 
 def get_g_page_config(content: str) -> list:
@@ -116,7 +43,7 @@ def get_g_page_config(content: str) -> list:
         dict: 回傳pager參數
     """
     # 先判斷是否被阻擋
-    content = checkVerify(content)
+    content = checkVerify.do(content)
     if "g_page_config" not in content:
         return {
             'status': 0,
@@ -151,45 +78,8 @@ def get_g_page_config(content: str) -> list:
     return GpcNav
 
 
-###############
-# 通用型Class
-###############
-class VerifyError(Exception):
-    """認證錯誤
-
-    Args:
-        Exception (Taobao): 因為解鎖失敗所以拋錯
-    """
-
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
-        MailString = open("./config/GetVerify.txt",
-                          "r", encoding="utf-8").read()
-        MailString = MailString.format(
-            args[0]['HOST'],
-            args[0]['PATH'],
-            args[0]['MSG']
-        )
-        # 發送Email
-        gmail.GInit().sendMsg(
-            "[淘寶爬蟲]驗證攔截",
-            MailString
-        )
-
-
-class chromeDriverInformation:
-    """chrome driver的設定參數
-    """
-    ip = None
-    port = None
-    drive = None
-
-# 通用型程式碼結束
-##########################################################################################
-
-
 class taobao:
-    def __init__(self, key: str, ip: str, port: int) -> None:
+    def __init__(self, key: str, sendMailTitle: str, ip: str, port: int) -> None:
         """初始化針對產品進行的抓取
 
         Args:
@@ -197,12 +87,19 @@ class taobao:
             ip (str): Driver之IP
             port (int): Driver之PORT
         """
+        ##############
+        # 下方程式碼可用於 Item, PPath, Nav
+        ##############
         # 先載入一隻神獸
         NoBugDragon = open(file="./arts/Nobug.art", mode="r", encoding="utf-8")
         print("{}\n".format(NoBugDragon.read()))
         NoBugDragon.close()
         del NoBugDragon
-        ##############
+        ###############
+        # 設定該Class獨立參數
+        ###############
+        self.sendMailTitl = sendMailTitle
+        ###############
         self.key = key
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
@@ -222,6 +119,7 @@ class taobao:
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
         self.NavDBSession = NavDBSession()
+
         print('[__init__]瀏覽器測試中..')
         self.TestUrl()
         print('[__init__]初始化完畢！')
@@ -293,6 +191,7 @@ class taobao:
         - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2&tab=mall&sort=sale-desc&ppath={}&s= 44 * p
         - 並將結果儲存至DB內
         - 同時傳送完畢的Email訊息
+        # TODO: 修改底下之code為專門爬取Item的
         """
         print("[getNavItemsService]載入關鍵字 {}".format(self.key))
         # 將chrome切換至search的頁面
@@ -403,6 +302,7 @@ if __name__ == "__main__":
     checkArgsNone(CrawlerArgs.port)
     gTaobaoSession = taobao(
         key=CrawlerArgs.key,
+        sendMailTitle=CrawlerArgs.EmailTitle,
         ip=CrawlerArgs.key,
         port=CrawlerArgs.port
     )
