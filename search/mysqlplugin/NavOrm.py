@@ -14,7 +14,6 @@ yamlData = None
 with open("./config/mysql.yaml", "r", encoding="utf-8") as stream:
     yamlData = yaml.load(stream, Loader=yaml.FullLoader)
     stream.close()
-    print("Yaml data loading complete!")
 yamlData = yamlData['Database']
 
 
@@ -22,8 +21,8 @@ yamlData = yamlData['Database']
 DBInfo  = f"mysql+pymysql://{yamlData['userName']}:{yamlData['userPwd']}@{yamlData['ip']}/{yamlData['databaseName']}?charset=utf8mb4"
 DBLink  = create_engine(DBInfo, poolclass=NullPool)
 Base    = declarative_base()
-print("ORM INIT complete!")
 
+print("[NavOrm]模組載入成功！")
 
 class Navs(Base):
     __tablename__   = yamlData['navTable']

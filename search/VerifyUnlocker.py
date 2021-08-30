@@ -7,6 +7,7 @@ driver = None
 key = None
 lastUrl = None
 
+print("[VerifyUnlocker]模組載入成功！")
 
 def freshPageToSearch(driver):
     """針對超過一次無法進行解鎖而設計之

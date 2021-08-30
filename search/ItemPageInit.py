@@ -11,22 +11,30 @@ import VerifyUnlocker
 # 自動化控制
 from selenium import webdriver
 
-
-class VerifyError(Exception):
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
-        MailString = open("./config/GetVerify.txt",
-                          "r", encoding="utf-8").read()
-        MailString = MailString.format(
-            args[0]['HOST'],
-            args[0]['PATH'],
-            args[0]['MSG']
-        )
-        # 發送Email
-        gmail.GInit().sendMsg(
-            "[淘寶爬蟲]驗證攔截",
-            MailString
-        )
+##########################################################################################
+#                                                    __----~~~~~~~~~~~------___
+#                                   .  .   ~~//====......          __--~ ~~
+#                   -.            \_|//     |||\\  ~~~~~~::::... /~
+#                ___-==_       _-~o~  \/    |||  \\            _/~~-
+#        __---~~~.==~||\=_    -_--~/_-~|-   |\\   \\        _/~
+#    _-~~     .=~    |  \\-_    '-~7  /-   /  ||    \      /
+#  .~       .~       |   \\ -_    /  /-   /   ||      \   /
+# /  ____  /         |     \\ ~-_/  /|- _/   .||       \ /
+# |~~    ~~|--~~~~--_ \     ~==-/   | \~--===~~        .\
+#          '         ~-|      /|    |-~\~~       __--~~
+#                      |-~~-_/ |    |   ~\_   _-~            /\
+#                           /  \     \__   \/~                \__
+#                       _--~ _/ | .-~~____--~-/                  ~~==.
+#                      ((->/~   '.|||' -_|    ~~-/ ,              . _||
+#                                 -_     ~\      ~~---l__i__i__i--~~_/
+#                                 _-~-__   ~)  \--______________--~~
+#                               //.-~~~-~_--~- |-------~~~~~~~~
+#                                      //.-~~~--\
+#                  神獸保佑
+#                程式碼永無BUG!
+##########################################################################################
+##########################################################################################
+# 通用型程式碼
 
 
 def checkVerify(content: str) -> str:
@@ -143,27 +151,73 @@ def get_g_page_config(content: str) -> list:
     return GpcNav
 
 
+###############
+# 通用型Class
+###############
+class VerifyError(Exception):
+    """認證錯誤
+
+    Args:
+        Exception (Taobao): 因為解鎖失敗所以拋錯
+    """
+
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+        MailString = open("./config/GetVerify.txt",
+                          "r", encoding="utf-8").read()
+        MailString = MailString.format(
+            args[0]['HOST'],
+            args[0]['PATH'],
+            args[0]['MSG']
+        )
+        # 發送Email
+        gmail.GInit().sendMsg(
+            "[淘寶爬蟲]驗證攔截",
+            MailString
+        )
+
+
+class chromeDriverInformation:
+    """chrome driver的設定參數
+    """
+    ip = None
+    port = None
+    drive = None
+
+# 通用型程式碼結束
+##########################################################################################
+
+
 class taobao:
-    def __init__(self, key: str, port: int) -> None:
-        """初始化對於pager的抓取
+    def __init__(self, key: str, ip: str, port: int) -> None:
+        """初始化針對產品進行的抓取
 
         Args:
             key (str): 針對何種產品進行抓取
+            ip (str): Driver之IP
             port (int): Driver之PORT
         """
+        # 先載入一隻神獸
+        NoBugDragon = open(file="./arts/Nobug.art", mode="r", encoding="utf-8")
+        print("{}\n".format(NoBugDragon.read()))
+        NoBugDragon.close()
+        del NoBugDragon
+        ##############
         self.key = key
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
         # 負責初始化瀏覽器的部分
-        self.driver = None
-        self.port = port
+        chromeDriverInformation.ip = ip
+        chromeDriverInformation.port = port
         # 打開Chrome
-        # 需創建Threading
-        chromeThreading = threading.Thread(target=self.createChromeBrowser)
-        chromeThreading.start()
+        if ip == "127.0.0.1":
+            # 需創建Threading
+            chromeThreading = threading.Thread(target=self.createChromeBrowser)
+            chromeThreading.start()
+        # 初始化Browser
         self.initBrowser()
         # 設定解鎖所需之參數
-        VerifyUnlocker.driver = self.driver
+        VerifyUnlocker.driver = chromeDriverInformation.drive
         VerifyUnlocker.key = self.key
         print('[__init__]資料庫初始化中..')
         NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
@@ -172,71 +226,81 @@ class taobao:
         self.TestUrl()
         print('[__init__]初始化完畢！')
         print('==============================')
-        self.getNavPagerService()
+        self.getNavItemsService()
         self.closeDriver()
         chromeThreading.join()
 
     def createChromeBrowser(self):
         """以Bash的方式打開一個Chrome
         """
-        subprocess.call(
-            ["RunNavChrome.bat"])
+        try:
+            subprocess.call(
+                ["RunNavChrome.bat"])
+        except Exception as e:
+            sys.exit(f"[無法啟動Chrome]{e}")
 
     def initBrowser(self):
-        """初始化爬蟲所需的webdriver
-        """
-        # 設定給予瀏覽器的options
-        options = webdriver.ChromeOptions()
-        # 設置控制通訊埠
-        options.add_experimental_option(
-            "debuggerAddress", "127.0.0.1:{}".format(self.port))
-        # 獲取本地的User名稱
-        # ServerUserName = getpass.getuser()
-        # 給予chromedriver需要讀取的資料
-        # OriginChromePath = "C:\\Users\\{}\\AppData\\Local\\Google\\Chrome\\User Data".format(
-        #    ServerUserName)
-        # 加入arg
-        # options.add_argument("user-data-dir={}".format(OriginChromePath))
-        # options.add_argument('--headless')
-        # options.add_argument('--no-sandbox')
-        # options.add_argument('--disable-gpu')
-        # options.add_argument('--disable-dev-shm-usage')
-        # 創建一個driver
-        self.driver = webdriver.Chrome(
-            executable_path="drivers/chromedriver.exe",
-            chrome_options=options
-        )
-        self.driver.implicitly_wait(30)
-        # 攔截webdriver之檢測代碼
-        self.driver.execute_cdp_cmd(
-            "Page.addScriptToEvaluateOnNewDocument",
-            {
-                "source": """
-                Object.defineProperty(navigator, 'webdriver', {
-                get: () => undefined
-                })
-                """
-            }
-        )
+        try:
+            """初始化爬蟲所需的webdriver
+            """
+            # 設定給予瀏覽器的options
+            options = webdriver.ChromeOptions()
+            # 設置控制通訊埠
+            options.add_experimental_option(
+                "debuggerAddress", "{}:{}".format(
+                    chromeDriverInformation.ip,
+                    chromeDriverInformation.port
+                ))
+            # 獲取本地的User名稱
+            # ServerUserName = getpass.getuser()
+            # 給予chromedriver需要讀取的資料
+            # OriginChromePath = "C:\\Users\\{}\\AppData\\Local\\Google\\Chrome\\User Data".format(
+            #    ServerUserName)
+            # 加入arg
+            # options.add_argument("user-data-dir={}".format(OriginChromePath))
+            # options.add_argument('--headless')
+            # options.add_argument('--no-sandbox')
+            # options.add_argument('--disable-gpu')
+            # options.add_argument('--disable-dev-shm-usage')
+            # 創建一個driver
+            chromeDriverInformation.drive = webdriver.Chrome(
+                executable_path="drivers/chromedriver.exe",
+                chrome_options=options
+            )
+            chromeDriverInformation.drive.implicitly_wait(30)
+            # 攔截webdriver之檢測代碼
+            chromeDriverInformation.drive.execute_cdp_cmd(
+                "Page.addScriptToEvaluateOnNewDocument",
+                {
+                    "source": """
+                    Object.defineProperty(navigator, 'webdriver', {
+                    get: () => undefined
+                    })
+                    """
+                }
+            )
+        except Exception as e:
+            sys.exit("[Chrome初始化失敗]{}".format(e))
 
     def TestUrl(self):
         """進行driver的網頁測試是否正常
         """
-        self.driver.get("https://www.google.com")
+        chromeDriverInformation.drive.get("https://www.google.com")
 
-    def getNavPagerService(self):
+    def getNavItemsService(self):
         """
-        - 獲取需儲存之品牌pager
-        - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2&tab=mall&sort=sale-desc&ppath={}
+        - 獲取需品牌底下的產品
+        - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2&tab=mall&sort=sale-desc&ppath={}&s= 44 * p
         - 並將結果儲存至DB內
         - 同時傳送完畢的Email訊息
         """
-        print("[getNavPagerService]載入關鍵字 {}".format(self.key))
+        print("[getNavItemsService]載入關鍵字 {}".format(self.key))
         # 將chrome切換至search的頁面
         # q     : key
         # tab   : 標籤
         # sort  : 排序方式
         # ppath : 品牌
+        # s     : 顯示頁面. s = 44 * p
         # 先query出所有為key的list
         queryByKeyList = self.NavDBSession.query(
             # 查詢Navs的資料表
@@ -251,13 +315,13 @@ class taobao:
         for result in queryByKeyList:
             print('[INFO]->', result.brand)
             # 切換頁面
-            self.driver.get(
+            chromeDriverInformation.drive.get(
                 "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
                     self.key,
                     result.ppath
                 )
             )
-            pageSource = self.driver.page_source
+            pageSource = chromeDriverInformation.drive.page_source
             pager = get_g_page_config(pageSource)
             # 取得pager後寫入資料庫
             # by brand
@@ -281,7 +345,7 @@ class taobao:
         Returns:
             Chrome: 目前正在使用的Chrome
         """
-        return self.driver
+        return chromeDriverInformation.drive
 
     def getCurrentDBsession(self):
         """回傳正在使用的DBsession
@@ -294,8 +358,8 @@ class taobao:
     def closeDriver(self):
         """結束Chrome driver
         """
-        self.driver.close()
-        self.driver.quit()
+        chromeDriverInformation.drive.close()
+        chromeDriverInformation.drive.quit()
         print("[CloseDriver]結束Nav抓取")
 
 
@@ -319,7 +383,8 @@ if __name__ == "__main__":
         "-ip",
         "--ip",
         type=str,
-        help="遠程控制需要用到的chrome"
+        help="遠程控制需要用到的chrome",
+        default="127.0.0.1"
     )
     CrawlerArgsParser.add_argument(
         "-p",
