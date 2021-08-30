@@ -75,7 +75,7 @@ class taobao:
         ###############
         # 設定該Class獨立參數
         ###############
-        self.sendMailTitl = sendMailTitle
+        self.sendMailTitle = sendMailTitle
         ###############
         self.key = key
         print('[__init__]key初始化完畢')
@@ -102,7 +102,7 @@ class taobao:
         self.TestUrl()
         print('[__init__]初始化完畢！')
         print('==============================')
-        self.getNavItemsService()
+        self.getNavPagerService()
         self.closeDriver()
         chromeThreading.join()
 

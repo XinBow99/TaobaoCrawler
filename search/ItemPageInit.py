@@ -98,7 +98,7 @@ class taobao:
         ###############
         # 設定該Class獨立參數
         ###############
-        self.sendMailTitl = sendMailTitle
+        self.sendMailTitle = sendMailTitle
         ###############
         self.key = key
         print('[__init__]key初始化完畢')
