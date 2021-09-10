@@ -147,7 +147,7 @@ class taobao:
         # options.add_argument('--disable-dev-shm-usage')
         # 創建一個driver
         self.driver = webdriver.Chrome(
-            executable_path="drivers/chromedriver.exe",
+            executable_path="drivers/chromedriver",
             chrome_options=options
         )
         self.driver.implicitly_wait(30)
