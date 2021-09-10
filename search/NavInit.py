@@ -6,6 +6,9 @@ import subprocess
 import threading
 import json
 import gmail
+# Timeout之後 重新試試看
+from retry import retry
+from timeout_decorator import timeout, TimeoutError
 from PublicFunctions import VerifyUnlocker, checkVerify
 # 自動化控制
 from selenium import webdriver
@@ -101,6 +104,16 @@ class taobao:
             self.TestUrl()
         chromeThreading.join()
 
+    @retry(TimeoutError, tries=10)
+    @timeout(10)
+    def getWithRetry(self, url):
+        """當瀏覽器載入不了時，需要retry
+
+        Args:
+            url (str): 指定的網址
+        """
+        self.driver.get(url)
+
     def createChromeBrowser(self):
         """以Bash的方式打開一個Chrome
         """
@@ -153,7 +166,7 @@ class taobao:
     def TestUrl(self):
         """進行driver的網頁測試是否正常
         """
-        self.driver.get("https://www.google.com")
+        self.getWithRetry("https://www.google.com")
 
     def getFirstPageNavService(self):
         """
@@ -169,7 +182,7 @@ class taobao:
         # sort  : 排序方式
         ConnentUrl = "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc".format(
             self.key)
-        self.driver.get(ConnentUrl)
+        self.getWithRetry(ConnentUrl)
         # 預防爆炸，並設定最後一個訪問的網址，如果解鎖則傳送之
         VerifyUnlocker.lastUrl = ConnentUrl
         print("[URL_初始化]{}".format(VerifyUnlocker.lastUrl))

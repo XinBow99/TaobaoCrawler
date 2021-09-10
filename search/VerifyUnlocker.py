@@ -2,12 +2,26 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 import time
 import random
+# Timeout之後 重新試試看
+from retry import retry
+from timeout_decorator import timeout, TimeoutError
 # 儲存DRIVER
 driver = None
 key = None
 lastUrl = None
 
 print("[VerifyUnlocker]模組載入成功！")
+@retry(TimeoutError, tries=10)
+@timeout(10)
+def getWithRetry(driverRrtry, url):
+    """當瀏覽器載入不了時，需要retry
+
+    Args:
+        driver (chrome)
+        url (str): 指定的網址
+    """
+    driverRrtry.get(url)
+
 
 def freshPageToSearch(driver):
     """針對超過一次無法進行解鎖而設計之
@@ -16,7 +30,7 @@ def freshPageToSearch(driver):
         driver (chromedrive): 瀏覽器控制權
     """
     driver.refresh()
-    driver.get("https://s.taobao.com/")
+    getWithRetry(driver, "https://s.taobao.com/")
     time.sleep(1)
     # 找搜尋的框框
     driver.find_element_by_xpath('//*[@id="q"]').send_keys(key, Keys.ENTER)
@@ -66,7 +80,7 @@ def Unlocker():
             driver.refresh()
             Unlocker()
         # 給Flag
-        driver.get(lastUrl)
+        getWithRetry(driver, lastUrl)
         time.sleep(5)
         print("[滑塊解除]")
         SuccessFlag = True
