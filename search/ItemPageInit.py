@@ -179,7 +179,7 @@ class taobao:
     def getNavItemsService(self):
         """
         - 獲取需品牌底下的產品
-        - https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s= 44 * p
+        - https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s= 44 * (p - 1)
         - 並將結果儲存至DB內
         - 同時傳送完畢的Email訊息
         # TODO: 修改底下之code為專門爬取Item的

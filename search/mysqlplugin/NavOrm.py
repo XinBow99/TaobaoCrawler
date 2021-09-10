@@ -83,7 +83,6 @@ class Items(Base):
     search_key              = Column(VARCHAR)
     brand                   = Column(VARCHAR)
     nid	                    = Column(VARCHAR)
-    category	            = Column(VARCHAR)
     title	                = Column(VARCHAR)
     raw_title	            = Column(VARCHAR)
     detail_url	            = Column(VARCHAR)
