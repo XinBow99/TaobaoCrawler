@@ -103,7 +103,10 @@ class taobao:
         print('[__init__]初始化完畢！')
         print('==============================')
         self.getNavPagerService()
-        self.closeDriver()
+        if ip == "127.0.0.1":
+            self.closeDriver()
+        else:
+            self.TestUrl()
         chromeThreading.join()
 
     def createChromeBrowser(self):
