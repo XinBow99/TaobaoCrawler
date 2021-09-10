@@ -232,7 +232,7 @@ class taobao:
                 self.driver.get(ConnentUrl)
                 # 預防爆炸，並設定最後一個訪問的網址，如果解鎖則傳送之
                 VerifyUnlocker.lastUrl = ConnentUrl
-                print("[URL_初始化]{}".format(VerifyUnlocker.lastUrl))
+                #print("[URL_初始化]{}".format(VerifyUnlocker.lastUrl))
                 # 取得網頁原始碼
                 pageSource = self.driver.page_source
                 # 分析網頁 -> auction
@@ -243,6 +243,7 @@ class taobao:
             print("[SQL]auctions寫入資料庫")
             for auction in tqdm(auctions):
                 # by brand
+                print(auction)
                 self.NavDBSession.add(
                     NavOrm.Items(
                         result.search_key,
