@@ -93,6 +93,7 @@ class Items(Base):
     user_id	                = Column(VARCHAR)
     nick	                = Column(VARCHAR)
     comment_url	            = Column(VARCHAR)
+    createAt                = Column(DATETIME)
     
     def __init__(self, search_key:str, brand:str, auctionOjb: dict) -> None:
         """寫入單一產品至資料庫
@@ -128,6 +129,7 @@ class Items(Base):
         self.user_id	    = checkDict(auctionOjb, "user_id")
         self.nick	        = checkDict(auctionOjb, "nick")
         self.comment_url	= checkDict(auctionOjb, "comment_url")
+        self.createAt       = datetime.datetime.now()
 
 class Verifys(Base):
     __tablename__           = yamlData['verifyTable']
