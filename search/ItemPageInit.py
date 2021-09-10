@@ -244,7 +244,6 @@ class taobao:
             print("[SQL]auctions寫入資料庫")
             for auction in tqdm(auctions):
                 # by brand
-                print(auction)
                 self.NavDBSession.add(
                     NavOrm.Items(
                         result.search_key,
