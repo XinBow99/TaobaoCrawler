@@ -229,7 +229,7 @@ class taobao:
                 ConnentUrl = "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s={}".format(
                     self.key,
                     result.ppath,
-                    44 * page
+                    44 * (page - 1)
                 )
                 self.driver.get(ConnentUrl)
                 # 預防爆炸，並設定最後一個訪問的網址，如果解鎖則傳送之
