@@ -12,7 +12,7 @@ lastUrl = None
 
 print("[VerifyUnlocker]模組載入成功！")
 @retry(TimeoutError, tries=10)
-@timeout(10)
+@timeout(20)
 def getWithRetry(driverRrtry, url):
     """當瀏覽器載入不了時，需要retry
 

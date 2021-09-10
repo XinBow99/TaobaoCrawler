@@ -104,8 +104,8 @@ class taobao:
             self.TestUrl()
         chromeThreading.join()
 
-    @retry(TimeoutError, tries=10)
-    @timeout(10)
+    @retry(TimeoutError, tries=50)
+    @timeout(20)
     def getWithRetry(self, url):
         """當瀏覽器載入不了時，需要retry
 
