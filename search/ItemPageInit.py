@@ -224,13 +224,15 @@ class taobao:
             auctions = []
             for page in tqdm(range(int(result.currentPage), int(result.totalPage) + 1)):
                 # 進入網頁
-                self.driver.get(
-                    "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s={}".format(
-                        self.key,
-                        result.ppath,
-                        44 * page
-                    )
+                ConnentUrl = "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s={}".format(
+                    self.key,
+                    result.ppath,
+                    44 * page
                 )
+                self.driver.get(ConnentUrl)
+                # 預防爆炸，並設定最後一個訪問的網址，如果解鎖則傳送之
+                VerifyUnlocker.lastUrl = ConnentUrl
+                print("[URL_初始化]{}".format(VerifyUnlocker.lastUrl))
                 # 取得網頁原始碼
                 pageSource = self.driver.page_source
                 # 分析網頁 -> auction

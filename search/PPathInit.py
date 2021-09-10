@@ -187,12 +187,14 @@ class taobao:
         for result in queryByKeyList:
             print('[INFO]->', result.brand)
             # 切換頁面
-            self.driver.get(
-                "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
-                    self.key,
-                    result.ppath
-                )
+            ConnentUrl = "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
+                self.key,
+                result.ppath
             )
+            self.driver.get(ConnentUrl)
+            # 預防爆炸，並設定最後一個訪問的網址，如果解鎖則傳送之
+            VerifyUnlocker.lastUrl = ConnentUrl
+            print("[URL_初始化]{}".format(VerifyUnlocker.lastUrl))
             pageSource = self.driver.page_source
             pager = get_g_page_config(pageSource)
             # 取得pager後寫入資料庫
