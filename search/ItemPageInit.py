@@ -64,7 +64,7 @@ def get_g_page_config(content: str) -> list:
         return jsonContent
     GpcNav = checkNode(GpcNav, 'mods')
     GpcNav = checkNode(GpcNav, 'itemlist')
-    GpcNav = checkArgsNone(GpcNav, 'auctions')
+    GpcNav = checkNode(GpcNav, 'auctions')
     return GpcNav
 
 
@@ -315,14 +315,14 @@ if __name__ == "__main__":
         help="設置爬蟲之CHROME控制通訊埠",
     )
 
-    def checkArgsNone(arg):
+    def checkArgsParserNone(arg):
         if arg == None:
             sys.exit("請確認輸入參數是否正確")
     CrawlerArgs = CrawlerArgsParser.parse_args()
-    checkArgsNone(CrawlerArgs.key)
-    checkArgsNone(CrawlerArgs.EmailTitle)
-    checkArgsNone(CrawlerArgs.ip)
-    checkArgsNone(CrawlerArgs.port)
+    checkArgsParserNone(CrawlerArgs.key)
+    checkArgsParserNone(CrawlerArgs.EmailTitle)
+    checkArgsParserNone(CrawlerArgs.ip)
+    checkArgsParserNone(CrawlerArgs.port)
     gTaobaoSession = taobao(
         key=CrawlerArgs.key,
         sendMailTitle=CrawlerArgs.EmailTitle,
