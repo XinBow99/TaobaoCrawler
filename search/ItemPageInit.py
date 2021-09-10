@@ -182,7 +182,6 @@ class taobao:
         - https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s= 44 * (p - 1)
         - 並將結果儲存至DB內
         - 同時傳送完畢的Email訊息
-        # TODO: 修改底下之code為專門爬取Item的
         """
         print("[getNavItemsService]載入關鍵字 {}".format(self.key))
         # 將chrome切換至search的頁面
@@ -190,9 +189,8 @@ class taobao:
         # tab   : 標籤
         # sort  : 排序方式
         # ppath : 品牌
-        # s     : 顯示頁面. s = 44 * p
+        # s     : 顯示頁面. s = 44 * (p-1)
         # 先query出所有為key的list
-        # TODO: 這邊修改為Join
         now = datetime.now()
         eight_hours_ago = now - timedelta(hours=8)
         queryByKeyList = self.NavDBSession.query(
@@ -240,7 +238,7 @@ class taobao:
                 # 分析網頁 -> auction
                 itemsAnalysis = get_g_page_config(pageSource)
                 # 取得網頁的auction並新增到陣列
-                auctions.append(itemsAnalysis)
+                auctions += itemsAnalysis
                 time.sleep(5)
             print("[SQL]auctions寫入資料庫")
             for auction in tqdm(auctions):
