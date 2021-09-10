@@ -64,6 +64,7 @@ def get_g_page_config(content: str) -> list:
         return jsonContent
     GpcNav = checkNode(GpcNav, 'mods')
     GpcNav = checkNode(GpcNav, 'itemlist')
+    print(GpcNav)
     GpcNav = checkNode(GpcNav, 'auctions')
     return GpcNav
 
