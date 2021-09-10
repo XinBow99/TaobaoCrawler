@@ -31,6 +31,7 @@ def Unlocker():
     """
     SuccessFlag = False
     SuccessMessage = "解除成功"
+    Bodys = ""
     print("[窗口狀態]最大化")
     driver.maximize_window()
     try:
@@ -67,10 +68,12 @@ def Unlocker():
         # 給Flag
         driver.get(lastUrl)
         time.sleep(5)
+        print("[滑塊解除]")
         SuccessFlag = True
+        Bodys = driver.page_source
     except Exception as e:
         SuccessMessage = str(e)
-    return (SuccessFlag, SuccessMessage)
+    return (SuccessFlag, SuccessMessage, Bodys)
 
 
 def TmallUnlock():
