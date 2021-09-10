@@ -5,11 +5,13 @@ import sys
 import subprocess
 import threading
 import json
+from datetime import datetime, timedelta
 import time
 from PublicFunctions import VerifyUnlocker, checkVerify
 # 自動化控制
 from selenium import webdriver
-
+# 進度條測試
+from tqdm import tqdm
 ##########################################################################################
 #                                                    __----~~~~~~~~~~~------___
 #                                   .  .   ~~//====......          __--~ ~~
@@ -35,12 +37,12 @@ from selenium import webdriver
 
 
 def get_g_page_config(content: str) -> list:
-    """抓取網頁原始碼內的g_page_config，並針對pager進行抓取
+    """抓取網頁原始碼內的g_page_config，並針對item進行抓取
 
     Args:
         content (str): 搜尋部分的淘寶網頁原始碼
     Returns:
-        dict: 回傳pager參數
+        dict: 回傳auction參數
     """
     # 先判斷是否被阻擋
     content = checkVerify.do(content)
@@ -60,21 +62,8 @@ def get_g_page_config(content: str) -> list:
         # 未來需放try catch
         return jsonContent
     GpcNav = checkNode(GpcNav, 'mods')
-    _temp = GpcNav
-    GpcNav = checkNode(GpcNav, 'pager')
-    if 'status' in GpcNav:
-        if GpcNav['status'] == "hide":
-            pager = {}
-            # 因為產品太少 所以只找一頁 故以auctions替代Size
-            _temp = checkNode(GpcNav, 'itemlist')
-            _temp = checkNode(GpcNav, 'data')
-            _temp = checkNode(GpcNav, 'auctions')
-            pager['pageSize'] = len(_temp)
-            pager['totalPage'] = 1
-            pager['currentPage'] = 1
-            pager['totalCount'] = len(_temp)
-            return pager
-    GpcNav = checkNode(GpcNav, 'data')
+    GpcNav = checkNode(GpcNav, 'itemlist')
+    GpcNav = checkArgsNone(GpcNav, 'auctions')
     return GpcNav
 
 
@@ -189,7 +178,7 @@ class taobao:
     def getNavItemsService(self):
         """
         - 獲取需品牌底下的產品
-        - https://s.taobao.com/search?q=%E5%B0%BF%E8%A4%B2&tab=mall&sort=sale-desc&ppath={}&s= 44 * p
+        - https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s= 44 * p
         - 並將結果儲存至DB內
         - 同時傳送完畢的Email訊息
         # TODO: 修改底下之code為專門爬取Item的
@@ -202,11 +191,26 @@ class taobao:
         # ppath : 品牌
         # s     : 顯示頁面. s = 44 * p
         # 先query出所有為key的list
+        # TODO: 這邊修改為Join
+        now = datetime.now()
+        eight_hours_ago = now - timedelta(hours=8)
         queryByKeyList = self.NavDBSession.query(
             # 查詢Navs的資料表
-            NavOrm.Navs
+            NavOrm.Navs.brand,
+            NavOrm.Navs.search_key,
+            NavOrm.Pagers.pageSize,
+            NavOrm.Pagers.totalPage,
+            NavOrm.Pagers.currentPage,
+            NavOrm.Pagers.totalCount,
+            NavOrm.Pagers.createAt
+        ).join(
+            NavOrm.Navs, NavOrm.Navs.brand == NavOrm.Pagers.brand
         ).filter_by(
             search_key=self.key
+        ).filter(
+            NavOrm.Pagers.createAt > eight_hours_ago
+        ).filter(
+            NavOrm.Pagers.createAt < now
         ).all()
         # 枚舉result
         # search_key
@@ -214,29 +218,36 @@ class taobao:
         # ppath
         for result in queryByKeyList:
             print('[INFO]->', result.brand)
-            # 切換頁面
-            self.driver.get(
-                "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}".format(
-                    self.key,
-                    result.ppath
+            # Save auctions
+            auctions = []
+            for page in tqdm(range(int(result.currentPage), int(result.totalPage) + 1)):
+                # 進入網頁
+                self.driver.get(
+                    "https://s.taobao.com/search?q={}&tab=mall&sort=sale-desc&ppath={}&s={}".format(
+                        self.key,
+                        result.ppath,
+                        44 * page
+                    )
                 )
-            )
-            pageSource = self.driver.page_source
-            pager = get_g_page_config(pageSource)
-            # 取得pager後寫入資料庫
-            # by brand
-            self.NavDBSession.add(
-                NavOrm.Pagers(
-                    brand=result.brand,
-                    pageSize=pager['pageSize'],
-                    totalPage=pager['totalPage'],
-                    currentPage=pager['currentPage'],
-                    totalCount=pager['totalCount']
+                # 取得網頁原始碼
+                pageSource = self.driver.page_source
+                # 分析網頁 -> auction
+                itemsAnalysis = get_g_page_config(pageSource)
+                # 取得網頁的auction並新增到陣列
+                auctions.append(itemsAnalysis)
+                time.sleep(5)
+            print("[SQL]auctions寫入資料庫")
+            for auction in tqdm(auctions):
+                # by brand
+                self.NavDBSession.add(
+                    NavOrm.Items(
+                        result.search_key,
+                        result.brand,
+                        auction
+                    )
                 )
-            )
-            # 各項請求需休息5秒，否則會被擋下來
-            self.NavDBSession.commit()
-            time.sleep(5)
+                # 各項請求需休息5秒，否則會被擋下來
+                self.NavDBSession.commit()
         self.NavDBSession.close()
 
     def getCurrentDriver(self):
