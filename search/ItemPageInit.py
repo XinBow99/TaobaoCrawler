@@ -234,13 +234,14 @@ class taobao:
                 VerifyUnlocker.lastUrl = ConnentUrl
                 #print("[URL_初始化]{}".format(VerifyUnlocker.lastUrl))
                 # 取得網頁原始碼
+                time.sleep(3)
                 pageSource = self.driver.page_source
                 # 分析網頁 -> auction
                 itemsAnalysis = get_g_page_config(pageSource)
                 # 取得網頁的auction並新增到陣列
                 print(itemsAnalysis[0])
                 auctions += list(itemsAnalysis)
-                time.sleep(5)
+                time.sleep(3)
             print("[SQL]auctions寫入資料庫")
             print(auctions[0])
             for auction in tqdm(auctions):
