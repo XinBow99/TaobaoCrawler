@@ -95,6 +95,7 @@ class Items(Base):
     comment_url	            = Column(VARCHAR)
     
     def __init__(self, search_key:str, brand:str, auctionOjb: dict) -> None:
+        print(auctionOjb)
         """寫入單一產品至資料庫
 
         Args:
