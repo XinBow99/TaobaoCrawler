@@ -199,6 +199,8 @@ class taobao:
             # 查詢Navs的資料表
             NavOrm.Navs.brand,
             NavOrm.Navs.search_key,
+            NavOrm.Navs.ppath,
+            # 查詢Pagers
             NavOrm.Pagers.pageSize,
             NavOrm.Pagers.totalPage,
             NavOrm.Pagers.currentPage,
