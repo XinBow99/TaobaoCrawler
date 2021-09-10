@@ -7,6 +7,7 @@ import threading
 import json
 from datetime import datetime, timedelta
 import time
+import gmail
 from PublicFunctions import VerifyUnlocker, checkVerify
 # 自動化控制
 from selenium import webdriver
@@ -216,6 +217,7 @@ class taobao:
         # search_key
         # brand
         # ppath
+        _tempPageLength = 0
         for result in queryByKeyList:
             print('[INFO]->', result.brand)
             # Save auctions
@@ -248,7 +250,13 @@ class taobao:
                 )
                 # 各項請求需休息5秒，否則會被擋下來
                 self.NavDBSession.commit()
+            _tempPageLength += len(auctions)
         self.NavDBSession.close()
+        gmail.GInit().sendMsg(
+            self.sendMailTitle,
+            "產品下載完成，{}項品牌，總共：{}項產品".format(
+                len(queryByKeyList), _tempPageLength)
+        )
 
     def getCurrentDriver(self):
         """回傳正在使用的Driver
