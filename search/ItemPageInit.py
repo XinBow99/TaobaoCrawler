@@ -238,6 +238,7 @@ class taobao:
                 # 分析網頁 -> auction
                 itemsAnalysis = get_g_page_config(pageSource)
                 # 取得網頁的auction並新增到陣列
+                print(itemsAnalysis[0])
                 auctions += list(itemsAnalysis)
                 time.sleep(5)
             print("[SQL]auctions寫入資料庫")
