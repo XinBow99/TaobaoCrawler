@@ -1,0 +1,1 @@
+放置search的config

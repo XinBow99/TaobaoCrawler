@@ -1,3 +1,4 @@
+from sqlalchemy.sql.expression import null
 from mysqlplugin import NavOrm
 import argparse
 import re
@@ -77,6 +78,7 @@ class taobao:
         print('[__init__]key初始化完畢')
         print('[__init__]瀏覽器初始化中..')
         # 打開Chrome
+        chromeThreading = None
         if ip == "127.0.0.1":
             # 需創建Threading
             print("[創建Session]For Chrome")
@@ -100,9 +102,9 @@ class taobao:
         self.getFirstPageNavService()
         if ip == "127.0.0.1":
             self.closeDriver()
+            chromeThreading.join()
         else:
             self.TestUrl()
-        chromeThreading.join()
 
     @retry(TimeoutError, tries=50)
     @timeout(20)
