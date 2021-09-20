@@ -1,5 +1,5 @@
 import requests
-from PublicFunctions import VerifyError, CookieError
+from PublicFunctions import VerifyError, CookieError, jsonp
 import argparse
 import sys
 import threading
@@ -199,11 +199,10 @@ class taobaoCrawlerByAPI:
             # Null設定完成
 
             # 開始進行請求
-            # TODO: 在遠端運行getCommentHandlerFlask，把要請求的東西以post送出去
+            # TODO: 改成巢狀迴圈
             self.TaobaoCommentInformation['headers']['referer'] = self.TaobaoCommentInformation['headers']['referer'].format(
                 item.nid)
-            print(self.TaobaoCommentInformation['headers'])
-            auctionRequest = requests.get(
+            commentFirstRequest = jsonp.get(requests.get(
                 url=self.TaobaoCommentInformation['api']['url'],
                 headers=self.TaobaoCommentInformation['headers'],
                 # cookies=self.TaobaoCommentInformation['cookies'],
@@ -215,9 +214,29 @@ class taobaoCrawlerByAPI:
                     "content": "1"
                 },
                 verify=False
-            )
-            print('[status]{}'.format(auctionRequest.status_code))
-            print(auctionRequest.text)
+            ).text)
+            # 取得rateDetail資訊
+            rateDetail = commentFirstRequest['rateDetail']
+            paginator = rateDetail['paginator']
+            lastPage = paginator['lastPage']
+            # 因為先獲取第一頁了 所以從2開始
+            for currentPage in range(2, lastPage + 1):
+                cmtSecResult = jsonp.get(requests.get(
+                    url=self.TaobaoCommentInformation['api']['url'],
+                    headers=self.TaobaoCommentInformation['headers'],
+                    # cookies=self.TaobaoCommentInformation['cookies'],
+                    params={
+                        "itemId": item.nid,
+                        "sellerId": item.user_id,
+                        "currentPage": currentPage,
+                        "order": 3,
+                        "content": "1"
+                    },
+                    verify=False
+                ).text)
+                print('cmtSecResult',cmtSecResult['rateDetail']['paginator'])
+            #
+            # print('[status]{}'.format(commentRequest.status_code))
             break
         # 然後再設定Sign
         # self.setSign()
@@ -226,15 +245,19 @@ class taobaoCrawlerByAPI:
         """產生一組Cookie供於Api使用
         """
         self.getWithRetry(self.firstItemDetailHtml)
-        cookiesList = self.driver.get_cookies()
-        cookieString = ""
-        for cookie in cookiesList:
-            cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
-        self.TaobaoCommentInformation['headers']['cookie'] = cookieString
-        #self.getWithRetry(self.firstItemDetailHtml)
-        #self.TaobaoCommentInformation['headers']['cookie'] = str(
-        #    self.driver.execute_script("return document.cookie"))
-        print(cookieString)
+        self.getWithRetry(
+            "chrome-extension://flldehcnleejgpingiffimidfjdcnfdi/popup.html")
+        self.driver.execute_script("getX5();")
+        x5Value = str(self.driver.execute_script("return x5;"))
+        #cookiesList = self.driver.get_cookies()
+        #cookieString = ""
+        # for cookie in cookiesList:
+        #    cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
+        #self.TaobaoCommentInformation['headers']['cookie'] = cookieString
+        # self.getWithRetry(self.firstItemDetailHtml)
+        self.TaobaoCommentInformation['headers']['cookie'] = "{}={}".format(
+            "x5sec", x5Value)
+        print(x5Value)
         print("[cookieGenerator]設定完成")
 
     def setSign(self):

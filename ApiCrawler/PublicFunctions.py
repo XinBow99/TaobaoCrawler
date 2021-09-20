@@ -1,5 +1,6 @@
 
 import re
+import json
 import VerifyUnlocker
 import gmail
 from mysqlplugin import NavOrm
@@ -115,5 +116,20 @@ class checkVerify:
             })
         return content
 
+class jsonp:
+    def get(content):
+        """取得JSONP
+
+        Args:
+            content (str): 爬取下來的內容
+
+        Returns:
+            json: 返回取得之JSON格式
+        """
+        jsonRe = re.findall(
+            r'jsonp128\((.*?)\)',
+            content
+        )
+        return json.loads(jsonRe[0])
 # 通用型程式碼結束
 ##########################################################################################
