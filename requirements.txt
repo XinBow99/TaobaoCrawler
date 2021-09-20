@@ -1,0 +1,15 @@
+certifi==2021.5.30
+charset-normalizer==2.0.6
+decorator==5.1.0
+greenlet==1.1.1
+idna==3.2
+py==1.10.0
+PyMySQL==1.0.2
+PyYAML==5.4.1
+requests==2.26.0
+retry==0.9.2
+selenium==3.141.0
+SQLAlchemy==1.4.23
+timeout-decorator==0.5.0
+tqdm==4.62.2
+urllib3==1.26.6

@@ -3,3 +3,4 @@
 __pycache__/
 Test/
 chromedrive*
+!requirements.txt
