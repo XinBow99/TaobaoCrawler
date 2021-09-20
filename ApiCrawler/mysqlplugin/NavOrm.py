@@ -39,6 +39,7 @@ class Items(Base):
     user_id = Column(VARCHAR)
     nick = Column(VARCHAR)
     comment_url = Column(VARCHAR)
+    status = Column(INTEGER)
     createAt = Column(DATETIME)
 
     def __init__(self, search_key: str, brand: str, auctionOjb: dict) -> None:

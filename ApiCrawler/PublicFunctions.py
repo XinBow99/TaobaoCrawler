@@ -30,6 +30,20 @@ class VerifyError(Exception):
             MailString
         )
 
+class CookieError(Exception):
+    """認證錯誤
+
+    Args:
+        Exception (Taobao): 因為解鎖失敗所以拋錯
+    """
+
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+        # 發送Email
+        gmail.GInit().sendMsg(
+            "[淘寶爬蟲]Cookie取值錯誤",
+            args[0]['Value']
+        )
 
 class checkVerify:
     def do(content: str) -> str:
