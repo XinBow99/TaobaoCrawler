@@ -189,10 +189,7 @@ class taobaoCrawlerByAPI:
         # 先設定Cookie
         self.cookieGenerator()
         # 跑回圈8.8K多筆
-        proxies = {
-            "http": "163.18.18.37:8888",
-            "https": "163.18.18.37:8888",
-        }
+        
         for item in tqdm(itemsResult, desc="[下載產品...]"):
             # set data
             # self.TaobaoCommentInformation['datas'][
