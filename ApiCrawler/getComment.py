@@ -101,7 +101,8 @@ class taobaoCrawlerByAPI:
             self.closeDriver()
             chromeThreading.join()
         else:
-            self.TestUrl()
+            # self.TestUrl()
+            pass
 
     @retry(TimeoutError, tries=50)
     @timeout(20)
@@ -189,22 +190,23 @@ class taobaoCrawlerByAPI:
         # 先設定Cookie
         self.cookieGenerator()
         # 跑回圈8.8K多筆
-        
         for item in tqdm(itemsResult, desc="[下載產品...]"):
             # set data
             # self.TaobaoCommentInformation['datas'][
             #    'data'] = '{"pageSize":10,"pageNo":1,"auctionNumId":"' + item.nid + '"}'
-            # set sign
+            # set sign 網頁版不用
             # self.setSign()
             # Null設定完成
 
             # 開始進行請求
+            # TODO: 在遠端運行getCommentHandlerFlask，把要請求的東西以post送出去
             self.TaobaoCommentInformation['headers']['referer'] = self.TaobaoCommentInformation['headers']['referer'].format(
                 item.nid)
+            print(self.TaobaoCommentInformation['headers'])
             auctionRequest = requests.get(
                 url=self.TaobaoCommentInformation['api']['url'],
                 headers=self.TaobaoCommentInformation['headers'],
-                #cookies=self.TaobaoCommentInformation['cookies'],
+                # cookies=self.TaobaoCommentInformation['cookies'],
                 params={
                     "itemId": item.nid,
                     "sellerId": item.user_id,
@@ -212,8 +214,7 @@ class taobaoCrawlerByAPI:
                     "order": 3,
                     "content": "1"
                 },
-                proxies=proxies,
-                #verify=False
+                verify=False
             )
             print('[status]{}'.format(auctionRequest.status_code))
             print(auctionRequest.text)
@@ -230,12 +231,17 @@ class taobaoCrawlerByAPI:
         for cookie in cookiesList:
             cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
         self.TaobaoCommentInformation['headers']['cookie'] = cookieString
+        #self.getWithRetry(self.firstItemDetailHtml)
+        #self.TaobaoCommentInformation['headers']['cookie'] = str(
+        #    self.driver.execute_script("return document.cookie"))
+        print(cookieString)
         print("[cookieGenerator]設定完成")
 
     def setSign(self):
         """產生一組爬蟲所需的sign與t
         """
         token = str(self.driver.get_cookie("_m_h5_tk"))
+        print(token)
         if '_' not in token:
             raise CookieError({'value': '_m_h5_tk'})
         token = token.split("_")[0]
@@ -288,6 +294,7 @@ if __name__ == "__main__":
         if arg == None:
             sys.exit("請確認輸入參數是否正確")
     CrawlerArgs = CrawlerArgsParser.parse_args()
+    # python getComment.py -k -t -ip -p
     checkArgsParserNone(CrawlerArgs.key)
     checkArgsParserNone(CrawlerArgs.EmailTitle)
     checkArgsParserNone(CrawlerArgs.ip)

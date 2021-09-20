@@ -1,0 +1,19 @@
+{
+  "name": "X5",
+  "description": "取得x5sec",
+  "version": "1.0",
+  "manifest_version": 2,
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "crawler.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "css": ["bootstrap.min.css"]
+    }
+  ],
+  "permissions": ["tabs", "<all_urls>", "cookies"]
+}
