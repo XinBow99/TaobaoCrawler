@@ -192,8 +192,8 @@ class taobaoCrawlerByAPI:
         # 跑回圈8.8K多筆
         # 設定IP SERVER
         proxyServer = {
-            'http':f"{self.ip}:8888",
-            'https':f"{self.ip}:8888",
+            'http': f"{self.ip}:8888",
+            'https': f"{self.ip}:8888",
         }
         for item in tqdm(itemsResult, desc="[下載產品...]"):
             # set data
@@ -244,7 +244,7 @@ class taobaoCrawlerByAPI:
                 )
                 self.NavDBSession.commit()
             # 因為先獲取第一頁了 所以從2
-            for currentPage in range(2, lastPage + 1):
+            for currentPage in tqdm(range(2, lastPage + 1), desc=item.title):
                 cmtSecResult = jsonp.get(requests.get(
                     url=self.TaobaoCommentInformation['api']['url'],
                     headers=self.TaobaoCommentInformation['headers'],
