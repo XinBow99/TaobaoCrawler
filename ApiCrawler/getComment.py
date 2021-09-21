@@ -237,7 +237,7 @@ class taobaoCrawlerByAPI:
                     )
                 )
                 self.NavDBSession.commit()
-            # 因為先獲取第一頁了 所以從2開始
+            # 因為先獲取第一頁了 所以從2
             for currentPage in range(2, lastPage + 1):
                 cmtSecResult = jsonp.get(requests.get(
                     url=self.TaobaoCommentInformation['api']['url'],
