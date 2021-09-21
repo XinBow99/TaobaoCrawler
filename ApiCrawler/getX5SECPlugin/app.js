@@ -16,7 +16,9 @@ async function getX5(){
   await getCookie().then(result=>{
     for(let rIndex = 0; rIndex < result.length; rIndex++){
       let t = result[rIndex];
+      if(x5.indexOf(t.value) !== -1){
       x5 += t.name + '=' + t.value + '; '
+    }
     }
     console.log(x5);
   });
