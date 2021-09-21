@@ -244,7 +244,7 @@ class taobaoCrawlerByAPI:
                 )
                 self.NavDBSession.commit()
             # 因為先獲取第一頁了 所以從2
-            for currentPage in tqdm(range(2, lastPage + 1), desc=item.title):
+            for currentPage in tqdm(range(2, lastPage + 1), desc=item.nid):
                 cmtSecResult = jsonp.get(requests.get(
                     url=self.TaobaoCommentInformation['api']['url'],
                     headers=self.TaobaoCommentInformation['headers'],
@@ -279,6 +279,7 @@ class taobaoCrawlerByAPI:
                         )
                     )
                     self.NavDBSession.commit()
+                time.sleep(3)
                 #print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
             #
             # print('[status]{}'.format(commentRequest.status_code))
