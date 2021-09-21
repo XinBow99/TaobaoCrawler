@@ -285,15 +285,16 @@ class taobaoCrawlerByAPI:
                 self.NavDBSession.commit()
             # 因為先獲取第一頁了 所以從2
             mutiT = []
-            for currentPage in tqdm(range(2, lastPage + 1), desc=item.nid):
-                if currentPage % 24 == 0 or currentPage + 1 == lastPage:
+            for currentPage in (range(2, lastPage + 1)):
+                if currentPage % 20 == 0 or currentPage + 1 == lastPage:
                     # 這邊做一個解除的動作
                     for mt in mutiT:
                         mt.start()
-                    for mt in tqdm(mutiT):
+                    for mt in (mutiT):
                         mt.join()
-                    input('Test!')
                     time.sleep(5)
+                    # todo: 網頁操作
+                    input('Test!')
                     self.cookieGenerator()
                     mutiT = []
                     # 開始跑第一次
@@ -338,7 +339,7 @@ class taobaoCrawlerByAPI:
                 # time.sleep(3)
                 #print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
             global cmtResult
-            for cmt in cmtResult:
+            for cmt in tqdm(cmtResult,desc="寫入資料庫"):
                 self.NavDBSession.add(
                     cmt
                 )
