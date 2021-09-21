@@ -271,7 +271,7 @@ class taobaoCrawlerByAPI:
                         )
                     )
                     self.NavDBSession.commit()
-                print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
+                #print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
             #
             # print('[status]{}'.format(commentRequest.status_code))
             break
@@ -296,9 +296,8 @@ class taobaoCrawlerByAPI:
         #    cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
         #self.TaobaoCommentInformation['headers']['cookie'] = cookieString
         # self.getWithRetry(self.firstItemDetailHtml)
-        self.TaobaoCommentInformation['headers']['cookie'] = "{}={}".format(
-            "x5sec", x5Value)
-        self.TaobaoCommentInformation['headers']['cookie'] = 't=cb540fdefdc1464e0ad764ad985ae2a1; lid=a075312100; _tb_token_=503175d76e8ee; cookie2=1322a02c0a3ab36b92bae337c9f29114; cna=05jQGS0kv3cCAaMSEiWOhKfO; xlly_s=1; dnk=a075312100; uc3=nk2=AiHI6I0PcYaGDQ%3D%3D&vt3=F8dCujdyMFixNMtYx1s%3D&lg2=W5iHLLyFOGW7aA%3D%3D&id2=UNJV2Eae8h8osw%3D%3D; tracknick=a075312100; uc4=id4=0%40UgXSrE%2BBPCAAZLK64cNjbScHIa3j&nk4=0%40AMr%2FiuL4O5JyVslRcIme5PPpjEkd; _l_g_=Ug%3D%3D; unb=3245557928; lgc=a075312100; cookie1=BqR0zIvIgb%2F7%2FUxkSkvtkFqrRlw0dZuY%2BMSTqLvtCYE%3D; login=true; cookie17=UNJV2Eae8h8osw%3D%3D; _nk_=a075312100; sgcookie=E100EXlpHM3psScyvuRFqJE5nHiquu8hX9Z46EXaSeK%2F1idE11OwiNsLohvqlpFgTUycvgLOLj%2F8sWeFqhvoZS1C%2B6sJwugNjKLzwE7lhOSLiag%3D; cancelledSubSites=empty; sg=084; csg=94a57be8; enc=48XOiri7XZor%2B%2BYUMKE5u%2FbJrXmJpQ0rDWEDkquOopBZFRfDsd3RnWgAjmn7la4%2Fx692Ir7wYLBi7ibMZvc8NQ%3D%3D; hng=TW%7Czh-TW%7CTWD%7C158; uc1=existShop=false&cookie14=Uoe3dYNYlDlwdg%3D%3D&cookie16=V32FPkk%2FxXMk5UvIbNtImtMfJQ%3D%3D&cookie15=V32FPkk%2Fw0dUvg%3D%3D&pas=0&cookie21=U%2BGCWk%2F7oPIg; x5sec=7b22617365727665723b32223a22383336383334346239313666363136343735633233643836653132336363373243493359706f6f47454f6d6176376571683866307241456144444d794e4455314e5463354d6a67374d5443756f66474e41673d3d227d; tfstk=cVlFBIXIeBdEGeVWHWNyN4SsJo8da4moc1z8Kv05hCr6YEVa0sxV2P4M2PzYDC2h.; l=eBM9VFdegrSnllJaBO5Znurza779UIRfCsPzaNbMiInca69FGhmRYNCL_412PdtjQt5fWetrd8LeqRnvJ24_WE_ceTwhKXIpBi96Re1..; isg=BFJSBszsZ6fH2Js9DFYGpQhtoxg0Y1b96C6X9RyrrIXaL_cpBPN5DwEJn5MTX86V'
+        self.TaobaoCommentInformation['headers']['cookie'] = x5Value
+        self.TaobaoCommentInformation['headers']['cookie'] = 't=6f367387ffc837e81e6df1c8dcab3cf7; lid=a075312100; _tb_token_=55b7e3db5e4fd; cookie2=184c0504271dc24c6fd032aab8e3ea6c; cna=/tPQGRBsMyQCAaMSEiUhKVB4; xlly_s=1; dnk=a075312100; uc1=cookie14=Uoe3dYNaki4vww%3D%3D&cookie16=W5iHLLyFPlMGbLDwA%2BdvAGZqLg%3D%3D&cookie15=U%2BGCWk%2F75gdr5Q%3D%3D&existShop=false&pas=0&cookie21=V32FPkk%2FhSg%2F; uc3=vt3=F8dCujdyMrOeYxU4YNA%3D&lg2=U%2BGCWk%2F75gdr5Q%3D%3D&nk2=AiHI6I0PcYaGDQ%3D%3D&id2=UNJV2Eae8h8osw%3D%3D; tracknick=a075312100; uc4=nk4=0%40AMr%2FiuL4O5JyVslRcIme5PFjJ4It&id4=0%40UgXSrE%2BBPCAAZLK64cNjbSWt9ZXD; _l_g_=Ug%3D%3D; unb=3245557928; lgc=a075312100; cookie1=BqR0zIvIgb%2F7%2FUxkSkvtkFqrRlw0dZuY%2BMSTqLvtCYE%3D; login=true; cookie17=UNJV2Eae8h8osw%3D%3D; _nk_=a075312100; sgcookie=E100%2FpSTIxiGjApHQH3lTt5odarD%2F1DtP13SDIt8tLqW%2BUT4lqLI7PnCYy636jjCbc71fUcPTzA0V4H5eANmFPJpur28Qo34hLLdxK4yP%2FXeX9M%3D; cancelledSubSites=empty; sg=084; csg=b970ac33; enc=0sZ43w0Y6As1GJSvgfexx9z4jnmwyxI4Wrz6ifi5HDBGqqhrwPF3PZNiRIl7hrDrEqQJZWWxr9cLT9AfEWjx7Q%3D%3D; x5sec=7b22617365727665723b32223a22633335343833363366663438323539363731633139326364613131386636666143496e5070346f47454d6a387575765139707a313067456144444d794e4455314e5463354d6a67374d5367474d4b366838593043227d; tfstk=cgOPBS2WpbhzaICIB_1EO_Rb7sgRa6xHfS7dELYLNK1xJ7Xlbs4avZbmvZ7OXjXl.; l=eBM9VFdegrSnl4ifBO5Z-urza779VIOfhsPzaNbMiInca6OPGCdJChCL_EK6PdtjQt5jietrd8LeqRhXJzaLRx_ceTwhKXIpBwv6Se1..; isg=BKamAnUz-3tWX6-5gPJq6fxx9xwoh-pB3ILDcZBOt0mCE0At-BfEUR-lbxefu-JZ'
         print(x5Value)
         print("[cookieGenerator]設定完成")
 

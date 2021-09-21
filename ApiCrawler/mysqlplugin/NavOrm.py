@@ -108,18 +108,18 @@ class Comments(Base):
     __tablename__ = yamlData['commentTable']
     __table_args__ = {"mysql_charset": "utf8"}
     _id = Column(INTEGER, primary_key=True)
-    nid = Column(INTEGER)
-    cid = Column(INTEGER)
+    nid = Column(VARCHAR)
+    cid = Column(VARCHAR)
     displayUserNick = Column(VARCHAR)
     items           = Column(INTEGER)
-    sellerId        = Column(INTEGER)
+    sellerId        = Column(VARCHAR)
     lastPage        = Column(INTEGER)
     page            = Column(INTEGER)
     picNum          = Column(INTEGER)
     total           = Column(INTEGER)
     used            = Column(INTEGER)
-    currentMilles   = Column(INTEGER)
-    intervalMilles  = Column(INTEGER)
+    currentMilles   = Column(VARCHAR)
+    intervalMilles  = Column(VARCHAR)
     # append comment
     apc_commentTime = Column(DATETIME)
     apc_content     = Column(VARCHAR)
