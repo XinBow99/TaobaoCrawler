@@ -256,6 +256,7 @@ class taobaoCrawlerByAPI:
                         "order": 3,
                         "content": "1"
                     },
+                    # Proxy 遠端方須架設
                     proxies=proxyServer,
                     verify=False
                 ).text)
