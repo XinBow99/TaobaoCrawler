@@ -52,7 +52,7 @@ def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
         # by cmt
         NavDBSession.add(
             NavOrm.Comments(
-                nid=nid,
+                nid=item.nid,
                 paginator=paginator,
                 rateCount=rateCount,
                 rateDanceInfo=rateDanceInfo,
