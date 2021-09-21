@@ -218,7 +218,7 @@ class taobaoCrawlerByAPI:
                     "order": 3,
                     "content": "1"
                 },
-                proxies=proxyServer,
+                # proxies=proxyServer,
                 verify=False
             ).text)
             # 取得rateDetail資訊
@@ -257,7 +257,7 @@ class taobaoCrawlerByAPI:
                         "content": "1"
                     },
                     # Proxy 遠端方須架設
-                    proxies=proxyServer,
+                    # proxies=proxyServer,
                     verify=False
                 ).text)
                 # TODO: 判斷flag<確認rgv587_flag
