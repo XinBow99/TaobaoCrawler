@@ -30,37 +30,40 @@ cmtResult = []
 
 
 def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
-    cmtSecResult = jsonp.get(requests.get(
-        url=TaobaoCommentInformation['api']['url'],
-        headers=TaobaoCommentInformation['headers'],
-        # cookies=self.TaobaoCommentInformation['cookies'],
-        params={
-            "itemId": item.nid,
-            "sellerId": item.user_id,
-            "currentPage": currentPage,
-            "order": 3,
-            "content": "1"
-        },
-        # Proxy 遠端方須架設
-        # proxies=proxyServer,
-        verify=False
-    ).text)
-    paginator = cmtSecResult['rateDetail']['paginator']
-    rateCount = cmtSecResult['rateDetail']['rateCount']
-    rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
-    rateList = cmtSecResult['rateDetail']['rateList']
-    # 寫入資料庫
-    for rateObj in rateList:
-        # by cmt
-        cmtResult.append(
-            NavOrm.Comments(
-                nid=item.nid,
-                paginator=paginator,
-                rateCount=rateCount,
-                rateDanceInfo=rateDanceInfo,
-                rateObjects=rateObj
+    try:
+        cmtSecResult = jsonp.get(requests.get(
+            url=TaobaoCommentInformation['api']['url'],
+            headers=TaobaoCommentInformation['headers'],
+            # cookies=self.TaobaoCommentInformation['cookies'],
+            params={
+                "itemId": item.nid,
+                "sellerId": item.user_id,
+                "currentPage": currentPage,
+                "order": 3,
+                "content": "1"
+            },
+            # Proxy 遠端方須架設
+            # proxies=proxyServer,
+            verify=False
+        ).text)
+        paginator = cmtSecResult['rateDetail']['paginator']
+        rateCount = cmtSecResult['rateDetail']['rateCount']
+        rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
+        rateList = cmtSecResult['rateDetail']['rateList']
+        # 寫入資料庫
+        for rateObj in rateList:
+            # by cmt
+            cmtResult.append(
+                NavOrm.Comments(
+                    nid=item.nid,
+                    paginator=paginator,
+                    rateCount=rateCount,
+                    rateDanceInfo=rateDanceInfo,
+                    rateObjects=rateObj
+                )
             )
-        )
+    except Exception as e:
+        print('[Error]',e)
 
 
 class taobaoCrawlerByAPI:
