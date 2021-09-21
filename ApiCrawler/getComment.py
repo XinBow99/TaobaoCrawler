@@ -190,6 +190,11 @@ class taobaoCrawlerByAPI:
         # 先設定Cookie
         self.cookieGenerator()
         # 跑回圈8.8K多筆
+        # 設定IP SERVER
+        proxyServer = {
+            'http':f"{self.ip}:8888",
+            'https':f"{self.ip}:8888",
+        }
         for item in tqdm(itemsResult, desc="[下載產品...]"):
             # set data
             # self.TaobaoCommentInformation['datas'][
@@ -213,6 +218,7 @@ class taobaoCrawlerByAPI:
                     "order": 3,
                     "content": "1"
                 },
+                proxies=proxyServer,
                 verify=False
             ).text)
             # 取得rateDetail資訊
@@ -250,6 +256,7 @@ class taobaoCrawlerByAPI:
                         "order": 3,
                         "content": "1"
                     },
+                    proxies=proxyServer,
                     verify=False
                 ).text)
                 # TODO: 判斷flag<確認rgv587_flag
