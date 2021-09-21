@@ -282,7 +282,7 @@ class taobaoCrawlerByAPI:
         """產生一組Cookie供於Api使用
         """
         # 先去產生x5key
-        self.getWithRetry(self.firstItemDetailHtml)
+        # self.getWithRetry(self.firstItemDetailHtml)
         # 然後判斷有沒有阻擋
 
         # 最後抓x5key
