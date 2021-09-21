@@ -286,9 +286,19 @@ class taobaoCrawlerByAPI:
             # 因為先獲取第一頁了 所以從2
             mutiT = []
             for currentPage in tqdm(range(2, lastPage + 1), desc=item.nid):
+                if currentPage % 24 == 0 or currentPage + 1 == lastPage:
+                    # 這邊做一個解除的動作
+                    for mt in mutiT:
+                        mt.start()
+                    for mt in tqdm(mutiT):
+                        mt.join()
+                    input('Test!')
+                    time.sleep(5)
+                    self.cookieGenerator()
+                    mutiT = []
+                    # 開始跑第一次
                 t = threading.Thread(target=mutiWorks, args=(
                     self.TaobaoCommentInformation, self.NavDBSession, item, currentPage,))
-
                 mutiT.append(t)
                 # cmtSecResult = jsonp.get(requests.get(
                 #    url=self.TaobaoCommentInformation['api']['url'],
@@ -305,6 +315,7 @@ class taobaoCrawlerByAPI:
                 #    # proxies=proxyServer,
                 #    verify=False
                 # ).text)
+                
                 ## TODO: 判斷flag<確認rgv587_flag
                 # 處理資料庫所需要使用的部分
                 #paginator = cmtSecResult['rateDetail']['paginator']
@@ -326,10 +337,6 @@ class taobaoCrawlerByAPI:
                 #    self.NavDBSession.commit()
                 # time.sleep(3)
                 #print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
-            for mt in mutiT:
-                mt.start()
-            for mt in tqdm(mutiT):
-                mt.join()
             global cmtResult
             for cmt in cmtResult:
                 self.NavDBSession.add(
