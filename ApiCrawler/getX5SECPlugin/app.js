@@ -6,7 +6,7 @@ function getCookie(){
         cookies.filter(
           (cookie) => 
           cookie.domain.indexOf("rate.tmall.com") !== -1 || 
-          cookie.domain === "rate.tmall.com" || 
+          cookie.domain === ".tmall.com" || 
           cookie.domain.indexOf("alicdn.com") !== -1
         )
       );
