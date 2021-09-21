@@ -26,6 +26,8 @@ from tqdm import tqdm
 from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
+cmtResult = []
+
 
 def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
     cmtSecResult = jsonp.get(requests.get(
@@ -50,7 +52,7 @@ def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
     # 寫入資料庫
     for rateObj in rateList:
         # by cmt
-        NavDBSession.add(
+        cmtResult.append(
             NavOrm.Comments(
                 nid=item.nid,
                 paginator=paginator,
@@ -59,7 +61,6 @@ def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
                 rateObjects=rateObj
             )
         )
-        NavDBSession.commit()
 
 
 class taobaoCrawlerByAPI:
@@ -284,9 +285,9 @@ class taobaoCrawlerByAPI:
             for currentPage in tqdm(range(2, lastPage + 1), desc=item.nid):
                 t = threading.Thread(target=mutiWorks, args=(
                     self.TaobaoCommentInformation, self.NavDBSession, item, currentPage,))
-                
+
                 mutiT.append(t)
-                #cmtSecResult = jsonp.get(requests.get(
+                # cmtSecResult = jsonp.get(requests.get(
                 #    url=self.TaobaoCommentInformation['api']['url'],
                 #    headers=self.TaobaoCommentInformation['headers'],
                 #    # cookies=self.TaobaoCommentInformation['cookies'],
@@ -300,15 +301,15 @@ class taobaoCrawlerByAPI:
                 #    # Proxy 遠端方須架設
                 #    # proxies=proxyServer,
                 #    verify=False
-                #).text)
+                # ).text)
                 ## TODO: 判斷flag<確認rgv587_flag
-                ## 處理資料庫所需要使用的部分
+                # 處理資料庫所需要使用的部分
                 #paginator = cmtSecResult['rateDetail']['paginator']
                 #rateCount = cmtSecResult['rateDetail']['rateCount']
                 #rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
                 #rateList = cmtSecResult['rateDetail']['rateList']
-                ## 寫入資料庫
-                #for rateObj in rateList:
+                # 寫入資料庫
+                # for rateObj in rateList:
                 #    # by cmt
                 #    self.NavDBSession.add(
                 #        NavOrm.Comments(
@@ -326,6 +327,12 @@ class taobaoCrawlerByAPI:
                 mt.start()
             for mt in tqdm(mutiT):
                 mt.join()
+            global cmtResult
+            for cmt in cmtResult:
+                self.NavDBSession.add(
+                    cmt
+                )
+                self.NavDBSession.commit()
             #
             # print('[status]{}'.format(commentRequest.status_code))
             break
