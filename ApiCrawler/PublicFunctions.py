@@ -126,6 +126,7 @@ class jsonp:
         Returns:
             json: 返回取得之JSON格式
         """
+        print(content)
         jsonRe = re.findall(
             r'jsonp128\((.*?)\)',
             content

@@ -107,7 +107,7 @@ class taobao:
             chromeThreading.start()
         # 初始化Browser
         self.ip = ip
-        self.port = port2
+        self.port = port
         self.driver = None
         self.initBrowser()
         # 設定解鎖所需之參數

@@ -216,9 +216,27 @@ class taobaoCrawlerByAPI:
                 verify=False
             ).text)
             # 取得rateDetail資訊
+            # TODO: 確認rgv587_flag 解一次解不過須重新整理
             rateDetail = commentFirstRequest['rateDetail']
+            # 資料庫會用到
             paginator = rateDetail['paginator']
+            rateCount = rateDetail['rateCount']
+            rateDanceInfo = rateDetail['rateDanceInfo']
+            rateList = rateDetail['rateList']
             lastPage = paginator['lastPage']
+            # 寫入第一筆資料
+            for rateObj in rateList:
+                # by cmt
+                self.NavDBSession.add(
+                    NavOrm.Comments(
+                        nid=item.nid,
+                        paginator=paginator,
+                        rateCount=rateCount,
+                        rateDanceInfo=rateDanceInfo,
+                        rateObjects=rateObj
+                    )
+                )
+                self.NavDBSession.commit()
             # 因為先獲取第一頁了 所以從2開始
             for currentPage in range(2, lastPage + 1):
                 cmtSecResult = jsonp.get(requests.get(
@@ -234,7 +252,26 @@ class taobaoCrawlerByAPI:
                     },
                     verify=False
                 ).text)
-                print('cmtSecResult',cmtSecResult['rateDetail']['paginator'])
+                # TODO: 判斷flag<確認rgv587_flag
+                # 處理資料庫所需要使用的部分
+                paginator = cmtSecResult['rateDetail']['paginator']
+                rateCount = cmtSecResult['rateDetail']['rateCount']
+                rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
+                rateList = cmtSecResult['rateDetail']['rateList']
+                # 寫入資料庫
+                for rateObj in rateList:
+                    # by cmt
+                    self.NavDBSession.add(
+                        NavOrm.Comments(
+                            nid=item.nid,
+                            paginator=paginator,
+                            rateCount=rateCount,
+                            rateDanceInfo=rateDanceInfo,
+                            rateObjects=rateObj
+                        )
+                    )
+                    self.NavDBSession.commit()
+                print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
             #
             # print('[status]{}'.format(commentRequest.status_code))
             break
@@ -244,7 +281,11 @@ class taobaoCrawlerByAPI:
     def cookieGenerator(self):
         """產生一組Cookie供於Api使用
         """
+        # 先去產生x5key
         self.getWithRetry(self.firstItemDetailHtml)
+        # 然後判斷有沒有阻擋
+
+        # 最後抓x5key
         self.getWithRetry(
             "chrome-extension://flldehcnleejgpingiffimidfjdcnfdi/popup.html")
         self.driver.execute_script("getX5();")
@@ -257,6 +298,7 @@ class taobaoCrawlerByAPI:
         # self.getWithRetry(self.firstItemDetailHtml)
         self.TaobaoCommentInformation['headers']['cookie'] = "{}={}".format(
             "x5sec", x5Value)
+        self.TaobaoCommentInformation['headers']['cookie'] = 't=cb540fdefdc1464e0ad764ad985ae2a1; lid=a075312100; _tb_token_=503175d76e8ee; cookie2=1322a02c0a3ab36b92bae337c9f29114; cna=05jQGS0kv3cCAaMSEiWOhKfO; xlly_s=1; dnk=a075312100; uc3=nk2=AiHI6I0PcYaGDQ%3D%3D&vt3=F8dCujdyMFixNMtYx1s%3D&lg2=W5iHLLyFOGW7aA%3D%3D&id2=UNJV2Eae8h8osw%3D%3D; tracknick=a075312100; uc4=id4=0%40UgXSrE%2BBPCAAZLK64cNjbScHIa3j&nk4=0%40AMr%2FiuL4O5JyVslRcIme5PPpjEkd; _l_g_=Ug%3D%3D; unb=3245557928; lgc=a075312100; cookie1=BqR0zIvIgb%2F7%2FUxkSkvtkFqrRlw0dZuY%2BMSTqLvtCYE%3D; login=true; cookie17=UNJV2Eae8h8osw%3D%3D; _nk_=a075312100; sgcookie=E100EXlpHM3psScyvuRFqJE5nHiquu8hX9Z46EXaSeK%2F1idE11OwiNsLohvqlpFgTUycvgLOLj%2F8sWeFqhvoZS1C%2B6sJwugNjKLzwE7lhOSLiag%3D; cancelledSubSites=empty; sg=084; csg=94a57be8; enc=48XOiri7XZor%2B%2BYUMKE5u%2FbJrXmJpQ0rDWEDkquOopBZFRfDsd3RnWgAjmn7la4%2Fx692Ir7wYLBi7ibMZvc8NQ%3D%3D; hng=TW%7Czh-TW%7CTWD%7C158; uc1=existShop=false&cookie14=Uoe3dYNYlDlwdg%3D%3D&cookie16=V32FPkk%2FxXMk5UvIbNtImtMfJQ%3D%3D&cookie15=V32FPkk%2Fw0dUvg%3D%3D&pas=0&cookie21=U%2BGCWk%2F7oPIg; x5sec=7b22617365727665723b32223a22383336383334346239313666363136343735633233643836653132336363373243493359706f6f47454f6d6176376571683866307241456144444d794e4455314e5463354d6a67374d5443756f66474e41673d3d227d; tfstk=cVlFBIXIeBdEGeVWHWNyN4SsJo8da4moc1z8Kv05hCr6YEVa0sxV2P4M2PzYDC2h.; l=eBM9VFdegrSnllJaBO5Znurza779UIRfCsPzaNbMiInca69FGhmRYNCL_412PdtjQt5fWetrd8LeqRnvJ24_WE_ceTwhKXIpBi96Re1..; isg=BFJSBszsZ6fH2Js9DFYGpQhtoxg0Y1b96C6X9RyrrIXaL_cpBPN5DwEJn5MTX86V'
         print(x5Value)
         print("[cookieGenerator]設定完成")
 
