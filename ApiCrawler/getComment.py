@@ -10,6 +10,7 @@ from mysqlplugin import NavOrm
 from retry import retry
 from timeout_decorator import timeout, TimeoutError
 ######################
+#########
 # 自動化控制
 from selenium import webdriver
 # 通用 function
@@ -24,6 +25,41 @@ from tqdm import tqdm
 # debug
 from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
+
+def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
+    cmtSecResult = jsonp.get(requests.get(
+        url=TaobaoCommentInformation['api']['url'],
+        headers=TaobaoCommentInformation['headers'],
+        # cookies=self.TaobaoCommentInformation['cookies'],
+        params={
+            "itemId": item.nid,
+            "sellerId": item.user_id,
+            "currentPage": currentPage,
+            "order": 3,
+            "content": "1"
+        },
+        # Proxy 遠端方須架設
+        # proxies=proxyServer,
+        verify=False
+    ).text)
+    paginator = cmtSecResult['rateDetail']['paginator']
+    rateCount = cmtSecResult['rateDetail']['rateCount']
+    rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
+    rateList = cmtSecResult['rateDetail']['rateList']
+    # 寫入資料庫
+    for rateObj in rateList:
+        # by cmt
+        NavDBSession.add(
+            NavOrm.Comments(
+                nid=nid,
+                paginator=paginator,
+                rateCount=rateCount,
+                rateDanceInfo=rateDanceInfo,
+                rateObjects=rateObj
+            )
+        )
+        NavDBSession.commit()
 
 
 class taobaoCrawlerByAPI:
@@ -244,43 +280,52 @@ class taobaoCrawlerByAPI:
                 )
                 self.NavDBSession.commit()
             # 因為先獲取第一頁了 所以從2
+            mutiT = []
             for currentPage in tqdm(range(2, lastPage + 1), desc=item.nid):
-                cmtSecResult = jsonp.get(requests.get(
-                    url=self.TaobaoCommentInformation['api']['url'],
-                    headers=self.TaobaoCommentInformation['headers'],
-                    # cookies=self.TaobaoCommentInformation['cookies'],
-                    params={
-                        "itemId": item.nid,
-                        "sellerId": item.user_id,
-                        "currentPage": currentPage,
-                        "order": 3,
-                        "content": "1"
-                    },
-                    # Proxy 遠端方須架設
-                    # proxies=proxyServer,
-                    verify=False
-                ).text)
-                # TODO: 判斷flag<確認rgv587_flag
-                # 處理資料庫所需要使用的部分
-                paginator = cmtSecResult['rateDetail']['paginator']
-                rateCount = cmtSecResult['rateDetail']['rateCount']
-                rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
-                rateList = cmtSecResult['rateDetail']['rateList']
-                # 寫入資料庫
-                for rateObj in rateList:
-                    # by cmt
-                    self.NavDBSession.add(
-                        NavOrm.Comments(
-                            nid=item.nid,
-                            paginator=paginator,
-                            rateCount=rateCount,
-                            rateDanceInfo=rateDanceInfo,
-                            rateObjects=rateObj
-                        )
-                    )
-                    self.NavDBSession.commit()
-                time.sleep(3)
+                t = threading.Thread(target=mutiWorks, args=(
+                    self.TaobaoCommentInformation, self.NavDBSession, item, currentPage,))
+                
+                mutiT.append(t)
+                #cmtSecResult = jsonp.get(requests.get(
+                #    url=self.TaobaoCommentInformation['api']['url'],
+                #    headers=self.TaobaoCommentInformation['headers'],
+                #    # cookies=self.TaobaoCommentInformation['cookies'],
+                #    params={
+                #        "itemId": item.nid,
+                #        "sellerId": item.user_id,
+                #        "currentPage": currentPage,
+                #        "order": 3,
+                #        "content": "1"
+                #    },
+                #    # Proxy 遠端方須架設
+                #    # proxies=proxyServer,
+                #    verify=False
+                #).text)
+                ## TODO: 判斷flag<確認rgv587_flag
+                ## 處理資料庫所需要使用的部分
+                #paginator = cmtSecResult['rateDetail']['paginator']
+                #rateCount = cmtSecResult['rateDetail']['rateCount']
+                #rateDanceInfo = cmtSecResult['rateDetail']['rateDanceInfo']
+                #rateList = cmtSecResult['rateDetail']['rateList']
+                ## 寫入資料庫
+                #for rateObj in rateList:
+                #    # by cmt
+                #    self.NavDBSession.add(
+                #        NavOrm.Comments(
+                #            nid=item.nid,
+                #            paginator=paginator,
+                #            rateCount=rateCount,
+                #            rateDanceInfo=rateDanceInfo,
+                #            rateObjects=rateObj
+                #        )
+                #    )
+                #    self.NavDBSession.commit()
+                # time.sleep(3)
                 #print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
+            for mt in mutiT:
+                mt.start()
+            for mt in tqdm(mutiT):
+                mt.join()
             #
             # print('[status]{}'.format(commentRequest.status_code))
             break
