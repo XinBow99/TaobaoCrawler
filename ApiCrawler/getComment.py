@@ -390,7 +390,7 @@ class taobaoCrawlerByAPI:
                     "status": 1
                 }
             )
-            if _temp > 0:
+            if len(list(_temp)) > 0:
                 x5Value = _temp[0].cookieValue
                 break
 
