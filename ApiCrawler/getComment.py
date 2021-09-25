@@ -394,7 +394,7 @@ class taobaoCrawlerByAPI:
                     }
                 )
                 break
-            print("[Cookie]取得中..")
+            print("[Cookie]取得中..",len(list(_temp)))
             time.sleep(5)
         self.TaobaoCommentInformation['headers']['cookie'] = x5Value
         print(x5Value)
