@@ -39,6 +39,8 @@ def request(flow: http.HTTPFlow) -> None:
                         status=0
                     )
                 )
+            navDBSession.commit()
+            
 
 
 def response(flow: http.HTTPFlow) -> None:
