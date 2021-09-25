@@ -1,9 +1,8 @@
+# crawler
 import requests
-from PublicFunctions import VerifyError, CookieError, jsonp
 import argparse
 import sys
 import threading
-from PublicFunctions import VerifyUnlocker
 from mysqlplugin import NavOrm
 ######################
 # Timeout之後 重新試試看
@@ -14,7 +13,7 @@ from timeout_decorator import timeout, TimeoutError
 # 自動化控制
 from selenium import webdriver
 # 通用 function
-from PublicFunctions import VerifyUnlocker, checkVerify
+from PublicFunctions import VerifyUnlocker, checkVerify, CookieError, jsonp
 # call bat
 import subprocess
 # Sign用
@@ -63,7 +62,7 @@ def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
                 )
             )
     except Exception as e:
-        print('[Error]',e)
+        print('[Error]', e)
 
 
 class taobaoCrawlerByAPI:
@@ -316,7 +315,7 @@ class taobaoCrawlerByAPI:
                 #    # proxies=proxyServer,
                 #    verify=False
                 # ).text)
-                
+
                 ## TODO: 判斷flag<確認rgv587_flag
                 # 處理資料庫所需要使用的部分
                 #paginator = cmtSecResult['rateDetail']['paginator']
@@ -339,7 +338,7 @@ class taobaoCrawlerByAPI:
                 # time.sleep(3)
                 #print('cmtSecResult', cmtSecResult['rateDetail']['paginator'])
             global cmtResult
-            for cmt in tqdm(cmtResult,desc="寫入資料庫"):
+            for cmt in tqdm(cmtResult, desc="寫入資料庫"):
                 self.NavDBSession.add(
                     cmt
                 )
@@ -358,16 +357,34 @@ class taobaoCrawlerByAPI:
         # 然後判斷有沒有阻擋
 
         # 最後抓x5key
-        self.getWithRetry(
-            "chrome-extension://flldehcnleejgpingiffimidfjdcnfdi/popup.html")
-        self.driver.execute_script("getX5();")
-        x5Value = str(self.driver.execute_script("return x5;"))
+        # self.getWithRetry(
+        #    "chrome-extension://flldehcnleejgpingiffimidfjdcnfdi/popup.html")
+        # self.driver.execute_script("getX5();")
+        #x5Value = str(self.driver.execute_script("return x5;"))
         #cookiesList = self.driver.get_cookies()
         #cookieString = ""
         # for cookie in cookiesList:
         #    cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
         #self.TaobaoCommentInformation['headers']['cookie'] = cookieString
-        # self.getWithRetry(self.firstItemDetailHtml)
+        self.getWithRetry(self.firstItemDetailHtml)
+        x5Value = ""
+        # 去跟資料庫拿cookie
+        while True:
+            # 直到取得cookie...
+            _temp = self.NavDBSession.query(
+                NavOrm.CookieGet
+            ).filter_by(
+                status=0
+            ).update(
+                # 用過了 所以改1
+                {
+                    "status": 1
+                }
+            )
+            if len(list(_temp)) > 0:
+                x5Value = _temp[0].cookieValue
+                break
+
         self.TaobaoCommentInformation['headers']['cookie'] = x5Value
         print(x5Value)
         print("[cookieGenerator]設定完成")

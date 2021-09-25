@@ -111,26 +111,26 @@ class Comments(Base):
     nid = Column(VARCHAR)
     cid = Column(VARCHAR)
     displayUserNick = Column(VARCHAR)
-    items           = Column(INTEGER)
-    sellerId        = Column(VARCHAR)
-    lastPage        = Column(INTEGER)
-    page            = Column(INTEGER)
-    picNum          = Column(INTEGER)
-    total           = Column(INTEGER)
-    used            = Column(INTEGER)
-    currentMilles   = Column(VARCHAR)
-    intervalMilles  = Column(VARCHAR)
+    items = Column(INTEGER)
+    sellerId = Column(VARCHAR)
+    lastPage = Column(INTEGER)
+    page = Column(INTEGER)
+    picNum = Column(INTEGER)
+    total = Column(INTEGER)
+    used = Column(INTEGER)
+    currentMilles = Column(VARCHAR)
+    intervalMilles = Column(VARCHAR)
     # append comment
     apc_commentTime = Column(DATETIME)
-    apc_content     = Column(VARCHAR)
-    apc_reply       = Column(VARCHAR)
-    apc_days        = Column(INTEGER)
+    apc_content = Column(VARCHAR)
+    apc_reply = Column(VARCHAR)
+    apc_days = Column(INTEGER)
     # Normal comment
-    rateContent     = Column(VARCHAR)
-    rateDate        = Column(DATETIME)
-    createAt        = Column(DATETIME)
+    rateContent = Column(VARCHAR)
+    rateDate = Column(DATETIME)
+    createAt = Column(DATETIME)
 
-    def __init__(self, nid: int, paginator: dict, rateCount: dict,rateDanceInfo: dict,rateObjects: dict) -> None:
+    def __init__(self, nid: int, paginator: dict, rateCount: dict, rateDanceInfo: dict, rateObjects: dict) -> None:
         """[儲存留言資訊所用]
 
         Args:
@@ -142,28 +142,58 @@ class Comments(Base):
         """
         self.nid = nid
         # paginator
-        self.items          = checkDict(paginator, "items")  
-        self.lastPage       = checkDict(paginator, "lastPage")
-        self.page           = checkDict(paginator, "page")
+        self.items = checkDict(paginator, "items")
+        self.lastPage = checkDict(paginator, "lastPage")
+        self.page = checkDict(paginator, "page")
         # rateCount
-        self.picNum         = checkDict(rateCount, "picNum")
-        self.total          = checkDict(rateCount, "total")
-        self.used           = checkDict(rateCount, "used")
+        self.picNum = checkDict(rateCount, "picNum")
+        self.total = checkDict(rateCount, "total")
+        self.used = checkDict(rateCount, "used")
         # rateDanceInfo
-        self.currentMilles  = checkDict(rateDanceInfo, "currentMilles")
+        self.currentMilles = checkDict(rateDanceInfo, "currentMilles")
         self.intervalMilles = checkDict(rateDanceInfo, "intervalMilles")
         # rateObjects
         # append comment 追評
-        self.apc_commentTime= checkDict(checkDict(rateObjects, "appendComment"), "commentTime")
-        self.apc_content    = checkDict(checkDict(rateObjects, "appendComment"), "content")
-        self.apc_reply      = checkDict(checkDict(rateObjects, "appendComment"), "reply")
-        self.apc_days       = checkDict(checkDict(rateObjects, "appendComment"), "days")
+        self.apc_commentTime = checkDict(
+            checkDict(rateObjects, "appendComment"), "commentTime")
+        self.apc_content = checkDict(
+            checkDict(rateObjects, "appendComment"), "content")
+        self.apc_reply = checkDict(
+            checkDict(rateObjects, "appendComment"), "reply")
+        self.apc_days = checkDict(
+            checkDict(rateObjects, "appendComment"), "days")
         # Normal comment 原評
-        self.sellerId       = checkDict(rateObjects, "sellerId")
-        self.displayUserNick= checkDict(rateObjects, "displayUserNick")
-        self.cid            = checkDict(rateObjects, "id")
-        self.rateContent    = checkDict(rateObjects, "rateContent")
-        self.rateDate       = checkDict(rateObjects, "rateDate")
+        self.sellerId = checkDict(rateObjects, "sellerId")
+        self.displayUserNick = checkDict(rateObjects, "displayUserNick")
+        self.cid = checkDict(rateObjects, "id")
+        self.rateContent = checkDict(rateObjects, "rateContent")
+        self.rateDate = checkDict(rateObjects, "rateDate")
+        self.createAt = datetime.datetime.now()
+
+
+class CookieGet(Base):
+    __tablename__ = yamlData['cookies']
+    __table_args__ = {"mysql_charset": "utf8"}
+    _id = Column(INTEGER, primary_key=True)
+    nid = Column(VARCHAR)
+    url = Column(VARCHAR)
+    cookieValue = Column(VARCHAR)
+    status = Column(INTEGER)
+    createAt = Column(DATETIME)
+
+    def __init__(self, nid: str, url: str, cookieValue: str, status: int) -> None:
+        """寫入Cookie之用，給proxy寫的
+
+        Args:
+            nid (str): 產品的id
+            url (str): 從哪個url取得cookie
+            cookieValue (str): cookie的參數
+            status (int): 目前這個cookie使用的狀態
+        """
+        self.nid = nid
+        self.url = url
+        self.cookieValue = cookieValue
+        self.status = status
         self.createAt = datetime.datetime.now()
 
 
