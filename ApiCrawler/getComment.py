@@ -382,19 +382,23 @@ class taobaoCrawlerByAPI:
             # 直到取得cookie...
             _temp = self.NavDBSession.query(
                 NavOrm.CookieGet
-            ).filter_by(
-                status=0
             )
             if len(list(_temp)) > 0:
-                x5Value = _temp[0].cookieValue
-                _temp.update(
-                    # 用過了 所以改1
-                    {
-                        "status": 1
-                    }
+                _tempF = _temp.filter_by(
+                    status=0
                 )
+                for cookie in _tempF:
+                    x5Value = cookie.cookieValue
+                    cookie.update(
+                        # 用過了 所以改1
+                        {
+                            "status": 1
+                        }
+                    )
+                    cookie.commit()
+                    break
                 break
-            print("[Cookie]取得中..",len(list(_temp)))
+            print("[Cookie]取得中..", len(list(_temp)))
             del _temp
             time.sleep(5)
         self.TaobaoCommentInformation['headers']['cookie'] = x5Value
