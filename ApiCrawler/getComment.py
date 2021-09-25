@@ -65,6 +65,13 @@ def mutiWorks(TaobaoCommentInformation, NavDBSession, item, currentPage):
         print('[Error]', e)
 
 
+def getFirstItem(driver, url):
+    try:
+        driver.get(url)
+    except:
+        print("[getFirstItem]請求時間過長，不要緊")
+
+
 class taobaoCrawlerByAPI:
     def __init__(self, key: str, sendMailTitle: str, ip: str, port: int) -> None:
         """初始化淘寶API爬蟲
@@ -349,9 +356,6 @@ class taobaoCrawlerByAPI:
         # 然後再設定Sign
         # self.setSign()
 
-    def getFirstItem(self):
-        self.getWithRetry(self.firstItemDetailHtml)
-
     def cookieGenerator(self):
         """產生一組Cookie供於Api使用
         """
@@ -369,7 +373,8 @@ class taobaoCrawlerByAPI:
         # for cookie in cookiesList:
         #    cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
         #self.TaobaoCommentInformation['headers']['cookie'] = cookieString
-        createTtoChromeGet = threading.Thread(target=self.getFirstItem)
+        createTtoChromeGet = threading.Thread(
+            target=getFirstItem, args=(self.driver, self.firstItemDetailHtml,))
         createTtoChromeGet.start()
         x5Value = ""
         # 去跟資料庫拿cookie
@@ -385,7 +390,7 @@ class taobaoCrawlerByAPI:
                     "status": 1
                 }
             )
-            if len(list(_temp)) > 0:
+            if _temp > 0:
                 x5Value = _temp[0].cookieValue
                 break
 

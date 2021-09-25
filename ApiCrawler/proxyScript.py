@@ -13,6 +13,7 @@ def request(flow: http.HTTPFlow) -> None:
         # 存入 cookie pool
         # 判斷目標存在不
         cookieValue = flow.request.headers['cookie']
+        print(cookieValue)
         itemIdRe = re.findall(r'itemId\=(.*?)\&', cookieValue)
         if len(itemIdRe) > 0:
             exists = navDBSession.query(
