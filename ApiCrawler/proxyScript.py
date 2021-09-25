@@ -8,7 +8,7 @@ navDBSession = NavDBSession()
 
 def request(flow: http.HTTPFlow) -> None:
     # 將請求新增了一個查詢參數
-    if 'https://rate.tmall.com/list_detail_rate.htm' in flow.request.url:
+    if 'https://rate.tmall.com/list_detail_rate.htm' in flow.request.url and 'ua=' in flow.request.url and '&content=1' in flow.request.url:
         print("[Proxy]->獲取Url，寫入資料庫")
         # 存入 cookie pool
         # 判斷目標存在不
@@ -40,7 +40,6 @@ def request(flow: http.HTTPFlow) -> None:
                     )
                 )
             navDBSession.commit()
-            
 
 
 def response(flow: http.HTTPFlow) -> None:
