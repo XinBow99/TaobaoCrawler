@@ -384,14 +384,15 @@ class taobaoCrawlerByAPI:
                 NavOrm.CookieGet
             ).filter_by(
                 status=0
-            ).update(
-                # 用過了 所以改1
-                {
-                    "status": 1
-                }
             )
             if len(list(_temp)) > 0:
                 x5Value = _temp[0].cookieValue
+                _temp.update(
+                    # 用過了 所以改1
+                    {
+                        "status": 1
+                    }
+                )
                 break
 
         self.TaobaoCommentInformation['headers']['cookie'] = x5Value
