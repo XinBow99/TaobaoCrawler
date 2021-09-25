@@ -349,6 +349,9 @@ class taobaoCrawlerByAPI:
         # 然後再設定Sign
         # self.setSign()
 
+    def getFirstItem(self):
+        self.getWithRetry(self.firstItemDetailHtml)
+
     def cookieGenerator(self):
         """產生一組Cookie供於Api使用
         """
@@ -366,7 +369,8 @@ class taobaoCrawlerByAPI:
         # for cookie in cookiesList:
         #    cookieString += "{}={}; ".format(cookie['name'], cookie['value'])
         #self.TaobaoCommentInformation['headers']['cookie'] = cookieString
-        self.getWithRetry(self.firstItemDetailHtml)
+        createTtoChromeGet = threading.Thread(target=self.getFirstItem)
+        createTtoChromeGet.start()
         x5Value = ""
         # 去跟資料庫拿cookie
         while True:
