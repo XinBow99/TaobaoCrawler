@@ -288,7 +288,7 @@ class taobaoCrawlerByAPI:
                         rateObjects=rateObj
                     )
                 )
-                self.NavDBSession.commit()
+            self.NavDBSession.commit()
             # 因為先獲取第一頁了 所以從2
             mutiT = []
             for currentPage in (range(2, lastPage + 1)):
