@@ -3,10 +3,9 @@ from mitmproxy import http
 
 def request(flow: http.HTTPFlow) -> None:
     # 將請求新增了一個查詢參數
-    if 'tmall' in flow.request.url:
+    if 'https://rate.tmall.com/list_detail_rate.htm' in flow.request.url:
+        print(flow.request.url)
         print(flow.request.headers['cookie'])
-    else:
-        return False
 
 
 def response(flow: http.HTTPFlow) -> None:
