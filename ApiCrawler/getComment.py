@@ -398,6 +398,10 @@ class taobaoCrawlerByAPI:
                     cookie.commit()
                     break
                 break
+            else:
+                NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
+                self.NavDBSession.close()
+                self.NavDBSession = NavDBSession()
             print("[Cookie]取得中..", len(list(_temp)))
             del _temp
             time.sleep(5)
