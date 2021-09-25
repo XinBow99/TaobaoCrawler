@@ -395,7 +395,8 @@ class taobaoCrawlerByAPI:
                             "status": 1
                         }
                     )
-                    _temp.commit()
+                    self.NavDBSession.close()
+                    self.NavDBSession = NavDBSession()
                     break
                 break
             else:
