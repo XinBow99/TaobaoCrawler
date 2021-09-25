@@ -14,7 +14,7 @@ def request(flow: http.HTTPFlow) -> None:
         # 判斷目標存在不
         cookieValue = flow.request.headers['cookie']
         print(cookieValue)
-        itemIdRe = re.findall(r'itemId\=(.*?)\&', cookieValue)
+        itemIdRe = re.findall(r'itemId\=(.*?)\&', flow.request.url)
         if len(itemIdRe) > 0:
             exists = navDBSession.query(
                 # 查詢CookieGet的資料表
