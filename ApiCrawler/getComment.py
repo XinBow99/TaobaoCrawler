@@ -389,13 +389,13 @@ class taobaoCrawlerByAPI:
                 )
                 for cookie in _tempF:
                     x5Value = cookie.cookieValue
-                    cookie.update(
+                    _temp.update(
                         # 用過了 所以改1
                         {
                             "status": 1
                         }
                     )
-                    cookie.commit()
+                    _temp.commit()
                     break
                 break
             else:
