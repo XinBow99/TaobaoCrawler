@@ -394,7 +394,8 @@ class taobaoCrawlerByAPI:
                     }
                 )
                 break
-
+            print("[Cookie]取得中..")
+            time.sleep(5)
         self.TaobaoCommentInformation['headers']['cookie'] = x5Value
         print(x5Value)
         print("[cookieGenerator]設定完成")
