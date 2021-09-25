@@ -396,6 +396,7 @@ class taobaoCrawlerByAPI:
                         }
                     )
                     self.NavDBSession.close()
+                    NavDBSession = NavOrm.sessionmaker(bind=NavOrm.DBLink)
                     self.NavDBSession = NavDBSession()
                     break
                 break
